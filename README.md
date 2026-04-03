@@ -1,7 +1,10 @@
 # forbes-crew
 
-Personal repository of all Claude Code skills, plugins, agents, and config.
-Use this as the source of truth to maintain and restore your Claude Code setup.
+Hey — this is where I keep my Claude Code setup. Skills, plugins, config, the whole thing.
+
+I update it as I go. It's my source of truth, but feel free to steal whatever's useful. Enjoy.
+
+---
 
 ---
 
