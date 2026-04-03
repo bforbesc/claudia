@@ -34,7 +34,7 @@ forbes-crew/
 └── sync.sh                     # Pull live ~/.claude files into this repo
 ```
 
-## Config files
+## Config
 
 **`CLAUDE.md`** is the instruction file Claude loads at session start. Because it's prompt-cached, anything in here costs almost nothing after the first turn — so it's the right place for rules you'd otherwise repeat every conversation. Mine covers: permissions, code style, token efficiency, plan mode behavior, safety rules, and agent routing with model assignments.
 
@@ -42,7 +42,7 @@ forbes-crew/
 
 **`statusline-command.sh`** powers the status bar at the bottom of the terminal. It shows the active model name, a color-coded progress bar for context window usage (green → orange → red), and rate limit usage for the 5-hour and 7-day windows. Turns red at 80% so you know when you're about to hit a wall. 📊
 
-## Hooks
+### Hooks
 
 Hooks are automated behaviors wired into `settings.json` that fire without Claude deciding to — the harness runs them directly.
 
@@ -52,7 +52,7 @@ Hooks are automated behaviors wired into `settings.json` that fire without Claud
 | `PostToolUse → AskUserQuestion` | After Claude asks a question | Speaks `"Need your input"` aloud |
 | `Stop` | When Claude finishes | Speaks `"Completed..."` aloud |
 
-## Custom skills
+## Skills
 
 Invoke any of these with `/skill-name` in a Claude Code session.
 
@@ -86,7 +86,7 @@ Not stored here — the code belongs to the marketplace authors. Install via `/p
 
 ## Keeping in sync
 
-When you change anything in `~/.claude/`, pull it into the repo with:
+(this is more for me actually) When you change anything in `~/.claude/`, pull it into the repo with:
 
 ```bash
 ./sync.sh
@@ -95,7 +95,7 @@ git add -A && git commit -m "sync config" && git push
 
 `sync.sh` only touches tracked files — it won't pull in anything unexpected.
 
-## Applying to a new machine
+## Migrating to a new machine
 
 ```bash
 cp config/CLAUDE.md ~/.claude/CLAUDE.md
