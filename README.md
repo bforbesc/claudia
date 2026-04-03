@@ -1,179 +1,107 @@
-# forbes-crew
+# Forbes' Crew 🤖
 
-Hey — this is where I keep my Claude Code setup. Skills, plugins, config, the whole thing.
+My Claude Code setup — because even AI needs a good manager.
 
-I update it as I go. It's my source of truth, but feel free to steal whatever's useful. Enjoy.
+This is where I keep my config, skills, and plugins. I update it as I go. It's my source of truth, but feel free to steal whatever's useful. Enjoy.
 
----
+## Where things live
 
-## File Locations
+All Claude Code config lives under `~/.claude/`:
 
-### General (any user)
+| File | Purpose |
+|------|---------|
+| `~/.claude/CLAUDE.md` | Global instructions loaded at the start of every session |
+| `~/.claude/settings.json` | Model, hooks, permissions, enabled plugins |
+| `~/.claude/statusline-command.sh` | Custom status bar script |
+| `~/.claude/skills/<name>/SKILL.md` | Custom skills, invoked with `/name` |
+| `~/.claude/projects/<path>/memory/MEMORY.md` | Per-project memory index |
 
-| File | Path |
-|------|------|
-| Global instructions | `~/.claude/CLAUDE.md` |
-| Settings & hooks | `~/.claude/settings.json` |
-| Custom skills | `~/.claude/skills/<skill-name>/SKILL.md` |
-| Plugin cache | `~/.claude/plugins/cache/claude-plugins-official/<plugin>/` |
-| Memory index | `~/.claude/projects/<project-path>/memory/MEMORY.md` |
-
-### This machine (`bforbesc`)
-
-| File | Absolute path |
-|------|---------------|
-| Global instructions | `/Users/bforbesc/.claude/CLAUDE.md` |
-| Settings & hooks | `/Users/bforbesc/.claude/settings.json` |
-| Custom skills | `/Users/bforbesc/.claude/skills/` |
-| Plugin cache | `/Users/bforbesc/.claude/plugins/cache/claude-plugins-official/` |
-
----
-
-## Repo Structure
+## What's in this repo
 
 ```
 forbes-crew/
-├── config/              # Source of truth for ~/.claude/ config files
-│   ├── CLAUDE.md            # Global instructions for all projects
-│   ├── settings.json        # Model, hooks, permissions, plugins
-│   └── statusline-command.sh  # Custom status bar script
-└── skills/              # Custom skills → ~/.claude/skills/
-    ├── check/
-    ├── handoff/
-    ├── pr/
-    ├── pr-comments/
-    ├── resolve-conflicts/
-    └── switch/
+├── config/
+│   ├── CLAUDE.md               # Global instructions for all projects
+│   ├── settings.json           # Model, hooks, permissions, plugins
+│   └── statusline-command.sh   # Custom status bar script
+├── skills/
+│   ├── check/
+│   ├── handoff/
+│   ├── pr/
+│   ├── pr-comments/
+│   ├── resolve-conflicts/
+│   └── switch/
+└── sync.sh                     # Pull live ~/.claude files into this repo
 ```
 
----
+## Config files
 
-## Config (`config/`)
+**`CLAUDE.md`** is the instruction file Claude loads at session start. Because it's prompt-cached, anything in here costs almost nothing after the first turn — so it's the right place for rules you'd otherwise repeat every conversation. Mine covers: permissions, code style, token efficiency, plan mode behavior, safety rules, and agent routing with model assignments.
 
-### `CLAUDE.md` → `~/.claude/CLAUDE.md`
+**`settings.json`** controls Claude Code at runtime: the default model (`sonnet`), which tools auto-approve without prompting, hooks, and which plugins are active. Subagents get their model set per-task (`opus` for planning and review, `haiku` for search and exploration).
 
-The global instruction file loaded at the start of every Claude Code session. Because it's prompt-cached, rules placed here are effectively free after the first turn — no need to repeat preferences in every message.
+**`statusline-command.sh`** powers the status bar at the bottom of the terminal. It shows the active model name, a color-coded progress bar for context window usage (green → orange → red), and rate limit usage for the 5-hour and 7-day windows. Turns red at 80% so you know when you're about to hit a wall. 📊
 
-Covers: permissions, code philosophy, token efficiency, engineering communication style, plan mode behavior, safety rules, agent routing with model assignments, and more.
+## Hooks
 
-### `settings.json` → `~/.claude/settings.json`
+Hooks are automated behaviors wired into `settings.json` that fire without Claude deciding to — the harness runs them directly.
 
-Claude Code runtime config. Key things set here:
+| Event | When | What it does |
+|-------|------|-------------|
+| `PreToolUse → Bash` | Before any `git commit` | Runs `/check` to catch bugs before they're committed |
+| `PostToolUse → AskUserQuestion` | After Claude asks a question | Speaks `"Need your input"` aloud |
+| `Stop` | When Claude finishes | Speaks `"Completed..."` aloud |
 
-- **Model**: `sonnet` by default; subagents use `opus` or `haiku` per task (set in CLAUDE.md)
-- **Hooks**: automated behaviors that run on specific events (see below)
-- **Permissions**: tools that auto-approve without prompting (`Read`, `Edit`, `Write`, `Glob`, `Grep`, `Agent`, web tools)
-- **Plugins**: which marketplace plugins are enabled
+## Custom skills
 
-### `statusline-command.sh` → `~/.claude/statusline-command.sh`
+Invoke any of these with `/skill-name` in a Claude Code session.
 
-A shell script that powers the Claude Code status bar. Displays:
-
-- **Active model** name in cyan
-- **Context window usage** as a color-coded progress bar (green → orange → red as it fills)
-- **Rate limit usage** for the 5-hour and 7-day windows, shown once data is available
-
-The bar turns orange at 50% and red at 80% so you can see at a glance when you're burning through context or hitting limits.
-
----
-
-## Keeping This Repo in Sync
-
-When you change anything in `~/.claude/` (CLAUDE.md, settings, skills), run:
-
-```bash
-./sync.sh
-```
-
-This pulls the live files into the repo. Then commit:
-
-```bash
-git add -A && git commit -m "sync config" && git push
-```
-
-`sync.sh` only touches files already tracked — it won't accidentally pull in anything new.
-
----
-
-## Applying Config to a New Machine
-
-```bash
-# Global instructions and settings
-cp config/CLAUDE.md ~/.claude/CLAUDE.md
-cp config/settings.json ~/.claude/settings.json
-
-# Status bar script
-cp config/statusline-command.sh ~/.claude/statusline-command.sh
-chmod +x ~/.claude/statusline-command.sh
-
-# Custom skills
-mkdir -p ~/.claude/skills
-cp -r skills/* ~/.claude/skills/
-```
-
----
+| Skill | What it does |
+|-------|-------------|
+| `check` | Reviews staged/unstaged changes for bugs, broken references, and runtime errors. Ignores style. |
+| `handoff` | Switches accounts while preserving context, or produces a handoff block to continue in a new session. |
+| `pr` | Stages, commits, pushes, and opens a PR — or adds a follow-up comment if one already exists. |
+| `pr-comments` | Fetches all PR comments and reviews, summarizes them, and recommends which ones are worth addressing. |
+| `resolve-conflicts` | Summarizes merge conflicts, resolves the obvious ones automatically, and asks about the ambiguous ones. |
+| `switch` | Switches Claude Code account (logout → login), no context passed. |
 
 ## Plugins
 
-Not stored here — the code belongs to the marketplace authors. Install them directly in Claude Code with `/plugins`.
-
-| Plugin | What it does |
-|--------|-------------|
-| `explanatory-output-style` | Adds educational `★ Insight` blocks to responses |
-| `code-simplifier` | Simplifies recently changed code for clarity |
-| `claude-md-management` | Audits and improves CLAUDE.md files |
-| `skill-creator` | Create, improve, and benchmark skills |
-| `commit-commands` | `/commit`, `/commit-push-pr`, `/clean_gone` shortcuts |
-| `pr-review-toolkit` | Full PR review suite with specialized agents |
-| `claude-code-setup` | Recommends automations for your workflow |
-| `context7` | Live library/framework docs via MCP |
-| `code-review` | Inline code review command |
-| `github` | GitHub MCP — issues, PRs, repos from Claude |
-| `playwright` | Browser automation via MCP |
-| `superpowers` | Brainstorming, TDD, debugging, worktrees, and more |
-
----
-
-## Active Hooks
-
-| Event | Trigger | Action |
-|-------|---------|--------|
-| `PreToolUse → Bash` | Any `git commit` command | Runs `/check` skill to catch bugs before committing |
-| `PostToolUse → AskUserQuestion` | Claude asks a question | Speaks `"Need your input"` aloud |
-| `Stop` | Claude finishes a response | Speaks `"Completed..."` aloud |
-
----
-
-## Custom Skills (`skills/`)
-
-Invoke with `/skill-name` in any Claude Code session.
-
-| Skill | Description |
-|-------|-------------|
-| `check` | Reviews staged/unstaged changes for bugs, broken references, and runtime errors before committing. Ignores style. |
-| `handoff` | Switches accounts while preserving conversation context, or produces a context block to continue in a new session. |
-| `pr` | Stages changes, commits, pushes, and opens a new PR or adds a follow-up comment to an existing one. |
-| `pr-comments` | Fetches all comments and reviews on the current PR, summarizes them, and recommends which to address. |
-| `resolve-conflicts` | Summarizes merge conflicts, resolves unambiguous ones automatically, and asks about ambiguous ones. |
-| `switch` | Switches Claude Code to a different account (logout → login) without passing context. |
-
----
-
-## Plugins (`plugins/`)
-
-Marketplace plugins from `claude-plugins-official`. Each adds skills, agents, commands, or hooks.
+Not stored here — the code belongs to the marketplace authors. Install via `/plugins` in Claude Code.
 
 | Plugin | What it provides |
 |--------|-----------------|
-| `claude-code-setup` | `claude-automation-recommender` — analyzes a codebase and recommends hooks, subagents, skills, and MCP servers |
-| `claude-md-management` | `claude-md-improver` skill + `/revise-claude-md` command — audits and improves CLAUDE.md files |
-| `code-review` | `/code-review` command — comprehensive inline code review |
-| `code-simplifier` | `code-simplifier` agent — simplifies recently changed code for clarity and maintainability |
-| `commit-commands` | `/commit`, `/commit-push-pr`, `/clean_gone` — git workflow shortcuts |
-| `context7` | Live documentation fetching for any library, framework, or SDK via MCP |
-| `explanatory-output-style` | SessionStart hook that enables educational insight mode with `★ Insight` blocks |
-| `github` | GitHub MCP integration — create issues, manage PRs, search repos directly from Claude |
-| `playwright` | Browser automation MCP integration |
-| `pr-review-toolkit` | `code-reviewer`, `silent-failure-hunter`, `comment-analyzer`, `pr-test-analyzer`, `type-design-analyzer` agents + `/review-pr` command |
-| `skill-creator` | `skill-creator` skill — create, improve, and benchmark skills with evals |
-| `superpowers` | Brainstorming, TDD, systematic debugging, git worktrees, subagent-driven development, and more |
+| `explanatory-output-style` | Adds `★ Insight` blocks for educational output |
+| `code-simplifier` | Simplifies recently changed code for clarity |
+| `claude-md-management` | Audits and improves CLAUDE.md files |
+| `skill-creator` | Create, improve, and benchmark custom skills |
+| `commit-commands` | `/commit`, `/commit-push-pr`, `/clean_gone` shortcuts |
+| `pr-review-toolkit` | Full PR review suite: `code-reviewer`, `silent-failure-hunter`, `comment-analyzer`, and more |
+| `claude-code-setup` | Recommends hooks, agents, and MCP servers for your workflow |
+| `context7` | Live library and framework docs via MCP |
+| `code-review` | Inline code review command |
+| `github` | GitHub MCP — manage issues, PRs, and repos from Claude |
+| `playwright` | Browser automation via MCP |
+| `superpowers` | Brainstorming, TDD, systematic debugging, git worktrees, and more |
+
+## Keeping in sync
+
+When you change anything in `~/.claude/`, pull it into the repo with:
+
+```bash
+./sync.sh
+git add -A && git commit -m "sync config" && git push
+```
+
+`sync.sh` only touches tracked files — it won't pull in anything unexpected.
+
+## Applying to a new machine
+
+```bash
+cp config/CLAUDE.md ~/.claude/CLAUDE.md
+cp config/settings.json ~/.claude/settings.json
+cp config/statusline-command.sh ~/.claude/statusline-command.sh && chmod +x ~/.claude/statusline-command.sh
+mkdir -p ~/.claude/skills && cp -r skills/* ~/.claude/skills/
+```
+
+Plugins aren't included here — reinstall them from the Claude Code marketplace using the list above.
