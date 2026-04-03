@@ -29,8 +29,7 @@ forbes-crew/
 │   ├── handoff/
 │   ├── pr/
 │   ├── pr-comments/
-│   ├── resolve-conflicts/
-│   └── switch/
+│   └── resolve-conflicts/
 └── sync.sh                     # Pull live ~/.claude files into this repo
 ```
 
@@ -59,11 +58,10 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 | Skill | What it does |
 |-------|-------------|
 | `check` | Reviews staged/unstaged changes for bugs, broken references, and runtime errors. Ignores style. |
-| `handoff` | Switches accounts while preserving context, or produces a handoff block to continue in a new session. |
+| `handoff` | Synthesizes conversation context, opens a new VS Code terminal with the other account, and passes the context automatically. |
 | `pr` | Stages, commits, pushes, and opens a PR — or adds a follow-up comment if one already exists. |
 | `pr-comments` | Fetches all PR comments and reviews, summarizes them, and recommends which ones are worth addressing. |
 | `resolve-conflicts` | Summarizes merge conflicts, resolves the obvious ones automatically, and asks about the ambiguous ones. |
-| `switch` | Switches Claude Code account (logout → login), no context passed. |
 
 ## Plugins
 
@@ -83,6 +81,47 @@ Not stored here — the code belongs to the marketplace authors. Install via `/p
 | `github` | GitHub MCP — manage issues, PRs, and repos from Claude |
 | `playwright` | Browser automation via MCP |
 | `superpowers` | Brainstorming, TDD, systematic debugging, git worktrees, and more |
+
+## Multiple accounts
+
+Two commands, two accounts, both running simultaneously if needed:
+
+| Command | Account |
+|---------|---------|
+| `claude` | Work account (`~/.claude/`) |
+| `claude-bfc` | Personal account (`~/.claude-bfc/`) |
+
+Both share the same `CLAUDE.md`, `settings.json`, skills, plugins, and projects via symlinks — one source of truth.
+
+**Setup on a new machine:**
+
+```bash
+# Create the personal config dir
+mkdir -p ~/.claude-bfc
+
+# Symlink shared config (auth files are separate per account)
+ln -s ~/.claude/CLAUDE.md ~/.claude-bfc/CLAUDE.md
+ln -s ~/.claude/settings.json ~/.claude-bfc/settings.json
+ln -s ~/.claude/skills ~/.claude-bfc/skills
+ln -s ~/.claude/projects ~/.claude-bfc/projects
+ln -s ~/.claude/plugins ~/.claude-bfc/plugins
+ln -s ~/.claude/statusline-command.sh ~/.claude-bfc/statusline-command.sh
+
+# Add alias to ~/.zshrc
+echo "alias claude-bfc='CLAUDE_CONFIG_DIR=~/.claude-bfc claude'" >> ~/.zshrc
+source ~/.zshrc
+```
+
+Then authenticate each account once:
+```bash
+claude          # /login → work account
+claude-bfc      # /login → personal account
+```
+
+**Switching when you hit the cap:**
+1. `/handoff` — fully automated: synthesizes context, opens a new VS Code terminal with the other account, and passes the context as the first prompt. Zero manual steps.
+
+**Prerequisite:** Grant accessibility permissions to VS Code in **System Settings → Privacy & Security → Accessibility** (needed for AppleScript to open terminals).
 
 ## Keeping in sync
 
