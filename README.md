@@ -1,4 +1,4 @@
-# Claudia's Instructions 🤖
+# Claudia's 🤖
 
 My Claude Code setup — because even AI needs a good manager.
 
