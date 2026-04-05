@@ -1,4 +1,4 @@
-# Forbes' Crew 🤖
+# Claudia's Instructions 🤖
 
 My Claude Code setup — because even AI needs a good manager.
 
