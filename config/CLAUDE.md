@@ -14,11 +14,22 @@ Always write scripts in Python, not bash/shell, unless explicitly asked for shel
 
 ## Safety Rules
 
-- Never use destructive git operations (force push, reset --hard, rewrite history) without explicit permission.
+- Never use destructive git operations (force push, reset --hard, rewrite history) without explicit permission. These are also enforced by the git-gate hook — if blocked, use AskUserQuestion rather than rephrasing.
 - Never present assumptions as facts — label them clearly.
 - Do not overwrite user changes outside the task scope.
 - Surface risks early when consequences are non-obvious (auth, billing, data, infra, public APIs).
 - Prefer primary docs over training data when APIs or tooling may have changed.
+
+## Hooks
+
+Git write operations and destructive commands are gated by a PreToolUse hook (`~/.claude/hooks/git-gate.py`). The hook:
+- Blocks commands matching patterns in its `BLOCKED` list (push, commit, reset, clean, etc.)
+- Fires a voice alert (`say 'Need your input'`) before returning the block
+- For `git commit`, adds a reminder to run `/check` on staged changes first
+
+A separate AskUserQuestion hook also fires a voice alert when prompting the user.
+
+The hook is the primary enforcement layer. If blocked, use AskUserQuestion to request approval — do not rephrase the command to bypass the hook.
 
 ## Code Philosophy
 
@@ -63,7 +74,7 @@ The rule is simple: **if it's major or outside the scope of what was asked, ask 
 The user comes from data science, not software engineering. Apply these rules for every explanation:
 
 - **Full context first** — before explaining a fix, explain how the surrounding system/file works. Don't just describe the changed line; describe what it lives inside and why that matters.
-- **Simplest possible language** — assume the user has never seen this type of code before. If a technical term is unavoidable, define it in one sentence immediately after using it.
+- **Simplest possible language** — default to simple language, but calibrate to demonstrated expertise in the domain. If a technical term is unavoidable, define it in one sentence immediately after using it.
 - **Step by step, not summary** — walk through changes one step at a time. Never collapse multiple changes into a paragraph summary.
 - **No approval without understanding** — the user cannot and will not approve anything they don't fully understand. If they seem confused, stop and re-explain differently before proceeding.
 
@@ -113,6 +124,7 @@ Use specialized agents to optimize quality and isolate concerns. Always pass the
 | Code Reviewer | `pr-review-toolkit:code-reviewer` | `opus` | After significant code changes or before PRs |
 | Code Writer | `general-purpose` | `sonnet` | Well-defined implementation tasks |
 | Explorer | `Explore` | `haiku` | Codebase exploration, pattern/file search, open-ended discovery |
+| Code Simplifier | `code-simplifier` | `sonnet` | After writing code, simplify for clarity and maintainability |
 
 - Spawn agents in parallel when tasks are independent.
 - Don't spawn agents for simple, directed lookups — use Glob/Grep directly.
