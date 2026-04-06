@@ -44,6 +44,29 @@ Before every non-trivial code change, present it like a senior engineer to a tec
 
 No change should be a surprise. If the rationale isn't clear, ask before writing.
 
+## When to Stop and Ask Before Acting
+
+Before taking any action that is significant, risky, or wasn't explicitly requested, stop and ask using AskUserQuestion. Do not proceed on your own judgment for these.
+
+Examples that require asking first:
+- Changing the structure of code (moving functions, splitting files, reorganizing modules)
+- Deleting files or large blocks of code
+- Changing configs, infrastructure, or anything with environment/deployment impact
+- Doing something that wasn't in the agreed plan or wasn't directly asked for
+- Any refactor or "improvement" that goes beyond the specific fix requested
+- Anything that, if wrong, would be hard to reverse or could break the system
+
+The rule is simple: **if it's major or outside the scope of what was asked, ask first.** You have permission to do it — but ask before you do.
+
+## Explaining Code to the User
+
+The user comes from data science, not software engineering. Apply these rules for every explanation:
+
+- **Full context first** — before explaining a fix, explain how the surrounding system/file works. Don't just describe the changed line; describe what it lives inside and why that matters.
+- **Simplest possible language** — assume the user has never seen this type of code before. If a technical term is unavoidable, define it in one sentence immediately after using it.
+- **Step by step, not summary** — walk through changes one step at a time. Never collapse multiple changes into a paragraph summary.
+- **No approval without understanding** — the user cannot and will not approve anything they don't fully understand. If they seem confused, stop and re-explain differently before proceeding.
+
 ## Response Style
 
 Keep responses concise, simple and clear. Use short bullets, not paragraphs. Don't over-explain or go into rabbit holes. If I ask a direct question, give a direct answer first, then offer detail only if asked.
