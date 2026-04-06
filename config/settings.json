@@ -16,7 +16,7 @@
       "mcp__*"
     ]
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -34,12 +34,6 @@
           {
             "type": "command",
             "command": "python3 ~/.claude/hooks/git-gate.py"
-          },
-          {
-            "type": "agent",
-            "prompt": "If $ARGUMENTS contains 'git commit', run the /check skill and block with {\"continue\": false, \"stopReason\": \"<issues>\"} if issues are found, otherwise {\"continue\": true}. If not a git commit, output {\"continue\": true} immediately.",
-            "timeout": 60,
-            "statusMessage": "Reviewing staged changes..."
           }
         ]
       }

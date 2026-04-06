@@ -117,3 +117,4 @@ Use specialized agents to optimize quality and isolate concerns. Always pass the
 - Spawn agents in parallel when tasks are independent.
 - Don't spawn agents for simple, directed lookups — use Glob/Grep directly.
 - `haiku` for any agent that only reads/searches (no writing). `sonnet` for writing. `opus` for reasoning-heavy tasks.
+- `haiku` also for execution-only agents — mechanical tasks like running commands, checking status, updating task logs, or anything that doesn't require reasoning.
