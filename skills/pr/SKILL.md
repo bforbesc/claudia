@@ -54,17 +54,41 @@ git push -u origin HEAD
 
 ```
 gh pr create --title "<title>" --base develop --body "$(cat <<'EOF'
-## Summary
-- <bullet 1>
-- <bullet 2>
-- <bullet 3 if needed>
+## What changed
+<One plain-English sentence. No jargon. Assume the reader has zero context.>
+
+## Why
+<The problem this solves or the goal it achieves. One or two sentences.>
+
+## Key decisions
+- <Decision 1: what was chosen and why — written so a non-engineer can understand>
+- <Decision 2 if applicable>
+
+## What to review
+<What the reviewer should specifically look at. One or two sentences.>
 EOF
 )"
 ```
 
-Body: 2–4 bullets, what changed and why. No checklists, no footers.
+No checklists, no footers, no "Co-Authored-By".
 
 ### 5. Print the PR URL
+
+### 6. Post a plain-English summary in the conversation for the user
+
+After printing the URL, output this block directly in the conversation (not as a PR comment):
+
+```
+---
+**PR Summary — for you**
+
+**What was done:** <one sentence, plain English, no jargon>
+**Key decisions:** <copy exactly from the "Key decisions" section in the PR body above — do not rewrite or paraphrase>
+**Impact:** <what this changes or affects in the system>
+**What to tell your boss/client:** <one copy-pasteable sentence they can use directly>
+**Watch out for:** <any risks, follow-ups, or things that need attention — or "Nothing, this is low risk">
+---
+```
 
 ---
 
@@ -78,7 +102,7 @@ git diff --cached
 git log --oneline @{u}..HEAD 2>/dev/null
 ```
 
-Read any modified files to understand what review feedback was addressed.
+Read any modified files to understand what review feedback was addressed. Only summarise changes from this window.
 
 ### 2. Stage and commit
 
@@ -102,3 +126,18 @@ EOF
 ```
 
 ### 5. Print the PR URL
+
+### 6. Post a plain-English summary in the conversation for the user
+
+After printing the URL, output this block directly in the conversation:
+
+```
+---
+**PR Update Summary — for you**
+
+**What changed in this update:** <one sentence, plain English>
+**Why:** <what review feedback or issue this addresses>
+**What to tell your boss/client:** <one copy-pasteable sentence>
+**Watch out for:** <any risks or follow-ups — or "Nothing, this is low risk">
+---
+```
