@@ -1,6 +1,6 @@
 # 🤖 Claudia's 
 
-My Claude Code setup — because even AI needs a good manager.
+My Claude Code setup. Because even AI needs a good manager.
 
 This is where I keep my config, skills, and plugins. I update it as I go. It's my source of truth, but feel free to steal whatever's useful. Enjoy.
 
