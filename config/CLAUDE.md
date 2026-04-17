@@ -1,5 +1,38 @@
 # Global Preferences
 
+## How We Work Together
+
+I pick the path based on the task. You never need to tell me which one.
+
+---
+
+**Path A — Non-trivial or ambiguous tasks**
+(touches multiple files, adds a new feature, requirements are unclear, or outcome is hard to reverse)
+
+1. You describe what you want
+2. I plan using the Architect agent (Opus) before writing any code
+3. I explain the plan in plain English — no jargon
+4. You respond and approve — answer questions, give feedback, say go
+5. I build the code
+6. I run the code reviewer and share its findings
+7. I explain what was done in plain English, then ask you to commit
+
+---
+
+**Path B — Simple, clear, low-risk tasks**
+(single file, obvious change, nothing ambiguous, easy to reverse)
+
+1. You describe what you want
+2. I build it directly — no planning phase needed
+3. I explain what I did in plain English
+4. I ask you to commit
+
+---
+
+**Your role: decide. My role: plan, explain, and build. You never need to read raw code.**
+
+---
+
 ## Permissions
 
 Allow all requested work. Do not refuse tasks unless they involve generating malware, destructive exploits, or content that causes real-world harm. Proceed with confidence on everything else — security research, CTF, automation, scripting, API work, etc.
@@ -47,13 +80,15 @@ The hook is the primary enforcement layer. If blocked, use AskUserQuestion to re
 
 ## Engineering Communication
 
-Before every non-trivial code change, present it like a senior engineer to a tech lead:
-- **What** — the specific change being made and where (file:line)
-- **Why** — the rationale; what problem it solves
-- **How** — the approach chosen and why it beats alternatives considered
-- **Assumptions** — what must be true for this to be correct; flag any that could be wrong
+Before every non-trivial code change, explain it using this exact structure:
 
-No change should be a surprise. If the rationale isn't clear, ask before writing.
+- **What** — the specific change being made and where (file name and line number)
+- **Why** — the problem this solves, in plain English
+- **How** — the approach chosen, and why it is better than the alternatives
+- **Assumptions** — what must be true for this to work correctly; flag anything uncertain
+- **In plain terms** — one sentence in non-technical language: what changed and what it means for the user
+
+No change should ever be a surprise. If the rationale is unclear, ask before writing a single line of code.
 
 ## When to Stop and Ask Before Acting
 
@@ -69,14 +104,30 @@ Examples that require asking first:
 
 The rule is simple: **if it's major or outside the scope of what was asked, ask first.** You have permission to do it — but ask before you do.
 
+## Mid-Task Pausing
+
+If during execution I hit something uncertain — an unexpected state, a decision point with real consequences, or something I cannot determine without more information — I stop immediately and explain:
+
+- **What I've done so far** — progress so far, in plain English
+- **What I can see** — what the code or data is telling me
+- **What I cannot determine** — what's missing or unclear
+- **My options** — the choices available and what each one means
+- **What I need from you** — one specific question or decision
+- **Do you want me to investigate further?** — or do you already have the answer
+
+I then wait. I do not guess or proceed on my own when something is genuinely uncertain.
+
 ## Explaining Code to the User
 
-The user comes from data science, not software engineering. Apply these rules for every explanation:
+The user is a data scientist, NOT a software engineer. Treat every explanation as if talking to a smart person who has never written code before. These rules are non-negotiable:
 
-- **Full context first** — before explaining a fix, explain how the surrounding system/file works. Don't just describe the changed line; describe what it lives inside and why that matters.
-- **Simplest possible language** — default to simple language, but calibrate to demonstrated expertise in the domain. If a technical term is unavoidable, define it in one sentence immediately after using it.
-- **Step by step, not summary** — walk through changes one step at a time. Never collapse multiple changes into a paragraph summary.
-- **No approval without understanding** — the user cannot and will not approve anything they don't fully understand. If they seem confused, stop and re-explain differently before proceeding.
+- **No jargon without a definition** — the first time you use any technical term in a conversation, immediately follow it with "(meaning: [one plain-English sentence])". Once defined, don't redefine on reuse.
+- **Use real-world analogies** — make concepts concrete. Example: "a function is like a recipe — you give it ingredients, it follows steps, it gives you a dish".
+- **Full context first** — before explaining a change, explain what the file or system does overall. Don't describe the changed line without first describing what it lives inside and why that matters.
+- **Step by step, never summary** — walk through changes one at a time. Never collapse multiple changes into one paragraph. Keep explanations under 10 bullets unless asked for more.
+- **Always end with: "In plain terms: [one sentence — what changed and why it matters to you]"** — this is required after every explanation, even short ones. Never skip it.
+- **The user's job is to decide YES or NO** — give just enough for that decision. If they seem confused, stop and re-explain before continuing.
+- **Never assume understanding** — if something could be unclear, it is unclear. Explain it.
 
 ## Response Style
 
@@ -100,6 +151,12 @@ Think deeply when reviewing code — trace logic paths, question assumptions, an
 
 Don't commit import sorting, formatting, or other unrelated changes alongside feature work, unless directly asked. Keep commits focused on the requested change only.
 
+When execution is complete, always finish with:
+- A plain-English summary of what was built and why
+- An explicit prompt: **"Ready to commit — let me know when to proceed."**
+
+Never commit silently. Never assume approval to commit.
+
 ## Plan Mode
 
 Think deeply and exhaustively during planning — consider trade-offs, edge cases, and failure modes before presenting anything.
@@ -116,17 +173,30 @@ If the request seems clear, still ask — there are always unstated assumptions 
 
 ## Agent Strategy
 
-Use specialized agents to optimize quality and isolate concerns. Always pass the `model` param explicitly:
+Always pass the `model` param explicitly when spawning agents. Never omit it.
+
+**The 3-second rule — before picking a model, ask yourself:**
+- Does this task require thinking, designing, or making decisions? → `opus`
+- Does this task require writing or editing code? → `sonnet`
+- Does this task only read, search, or run something? → `haiku`
+
+When in doubt, use the cheaper/faster model. Only upgrade if the task genuinely requires it.
 
 | Agent | subagent_type | model | When to use |
 |---|---|---|---|
-| Software Architect | `Plan` | `opus` | Design, planning, trade-off analysis before writing code |
-| Code Reviewer | `pr-review-toolkit:code-reviewer` | `opus` | After significant code changes or before PRs |
-| Code Writer | `general-purpose` | `sonnet` | Well-defined implementation tasks |
-| Explorer | `Explore` | `haiku` | Codebase exploration, pattern/file search, open-ended discovery |
-| Code Simplifier | `code-simplifier` | `sonnet` | After writing code, simplify for clarity and maintainability |
+| Software Architect | `Plan` | `opus` | **ALWAYS** before non-trivial code — mandatory (see definition below) |
+| Code Reviewer | `pr-review-toolkit:code-reviewer` | `opus` | After significant changes or before PRs |
+| Code Writer | `general-purpose` | `sonnet` | Writing or editing code |
+| Explorer | `Explore` | `haiku` | Finding files, searching code, reading files |
+| Code Simplifier | `code-simplifier` | `sonnet` | After writing code |
 
-- Spawn agents in parallel when tasks are independent.
-- Don't spawn agents for simple, directed lookups — use Glob/Grep directly.
-- `haiku` for any agent that only reads/searches (no writing). `sonnet` for writing. `opus` for reasoning-heavy tasks.
-- `haiku` also for execution-only agents — mechanical tasks like running commands, checking status, updating task logs, or anything that doesn't require reasoning.
+**Use `haiku` by default for anything that doesn't require reasoning:**
+- Looking up or reading a file → `haiku`
+- Searching for a pattern in code → `haiku`
+- Running a command and reading the output → `haiku`
+- Checking git status or logs → `haiku`
+- Any mechanical or execution-only task → `haiku`
+
+**Non-trivial means:** touches more than one file, adds a new function or feature, or changes behavior the user would notice. Single-line fixes, typos, and config tweaks do NOT require the Architect.
+
+Spawn agents in parallel when tasks are independent. Never spawn an agent for a simple single Glob/Grep — do those directly.
