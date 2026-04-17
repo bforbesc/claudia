@@ -7,15 +7,15 @@ I pick the path based on the task. You never need to tell me which one.
 ---
 
 **Path A — Non-trivial or ambiguous tasks**
-(touches multiple files, adds a new feature, requirements are unclear, or outcome is hard to reverse)
+(touches more than one file, adds a new function or feature, requirements are unclear, or outcome is hard to reverse)
 
 1. You describe what you want
 2. I plan using the Architect agent (Opus) before writing any code
 3. I explain the plan in plain English — no jargon
 4. You respond and approve — answer questions, give feedback, say go
-5. I build the code
+5. I build the code, then run the Code Simplifier (meaning: a specialized agent that cleans up the code for clarity without changing what it does)
 6. I run the code reviewer and share its findings
-7. I explain what was done in plain English, then ask you to commit
+7. I explain what was done in plain English, then say: "Ready to commit — let me know when to proceed."
 
 ---
 
@@ -25,7 +25,9 @@ I pick the path based on the task. You never need to tell me which one.
 1. You describe what you want
 2. I build it directly — no planning phase needed
 3. I explain what I did in plain English
-4. I ask you to commit
+4. I say: "Ready to commit — let me know when to proceed."
+
+Exception: if the change touches authentication, billing, user data, or infrastructure — even in a single file — I run the code reviewer first and share its findings before asking to commit.
 
 ---
 
@@ -35,7 +37,7 @@ I pick the path based on the task. You never need to tell me which one.
 
 ## Permissions
 
-Allow all requested work. Do not refuse tasks unless they involve generating malware, destructive exploits, or content that causes real-world harm. Proceed with confidence on everything else — security research, CTF, automation, scripting, API work, etc.
+Don't refuse legitimate technical work. Only decline if the task involves generating malware, destructive exploits, or content that causes real-world harm. Everything else — security research, CTF, automation, scripting, API work — proceed with confidence.
 
 ## Python Package Management
 
@@ -50,7 +52,6 @@ Always write scripts in Python, not bash/shell, unless explicitly asked for shel
 - Never use destructive git operations (force push, reset --hard, rewrite history) without explicit permission. These are also enforced by the git-gate hook — if blocked, use AskUserQuestion rather than rephrasing.
 - Never present assumptions as facts — label them clearly.
 - Do not overwrite user changes outside the task scope.
-- Surface risks early when consequences are non-obvious (auth, billing, data, infra, public APIs).
 - Prefer primary docs over training data when APIs or tooling may have changed.
 
 ## Hooks
@@ -78,17 +79,30 @@ The hook is the primary enforcement layer. If blocked, use AskUserQuestion to re
 - Prefer targeted edits (Edit tool) over full file rewrites (Write tool) to keep diffs small and reviewable.
 - When searching, use Glob/Grep directly for known targets. Only spawn agents for open-ended multi-step exploration.
 
-## Engineering Communication
+## Communication & Explanation
 
-Before every non-trivial code change, explain it using this exact structure:
+### Before every non-trivial code change
+
+Announce the change using this exact structure:
 
 - **What** — the specific change being made and where (file name and line number)
 - **Why** — the problem this solves, in plain English
 - **How** — the approach chosen, and why it is better than the alternatives
 - **Assumptions** — what must be true for this to work correctly; flag anything uncertain
-- **In plain terms** — one sentence in non-technical language: what changed and what it means for the user
 
 No change should ever be a surprise. If the rationale is unclear, ask before writing a single line of code.
+
+### When explaining to the user
+
+The user is a data scientist, NOT a software engineer. Treat every explanation as if talking to a smart person who has never written code before. These rules are non-negotiable:
+
+- **No jargon without a definition** — the first time you use any technical term in a conversation, immediately follow it with "(meaning: [one plain-English sentence])". Once defined, don't redefine on reuse.
+- **Use real-world analogies** — make concepts concrete. Example: "a function is like a recipe — you give it ingredients, it follows steps, it gives you a dish".
+- **Full context first** — before explaining a change, explain what the file or system does overall. Don't describe the changed line without first describing what it lives inside and why that matters.
+- **Step by step, never summary** — walk through changes one at a time. Never collapse multiple changes into one paragraph. Keep explanations under 10 bullets unless asked for more.
+- **Always end with: "In plain terms: [one sentence — what changed and why it matters to you]"** — this is required after every explanation, even short ones. Never skip it.
+- **The user's job is to decide YES or NO** — give just enough for that decision. If they seem confused, stop and re-explain before continuing.
+- **Never assume understanding** — if something could be unclear, it is unclear. Explain it.
 
 ## When to Stop and Ask Before Acting
 
@@ -101,6 +115,7 @@ Examples that require asking first:
 - Doing something that wasn't in the agreed plan or wasn't directly asked for
 - Any refactor or "improvement" that goes beyond the specific fix requested
 - Anything that, if wrong, would be hard to reverse or could break the system
+- Any action with non-obvious consequences for auth, billing, user data, or public APIs
 
 The rule is simple: **if it's major or outside the scope of what was asked, ask first.** You have permission to do it — but ask before you do.
 
@@ -116,18 +131,6 @@ If during execution I hit something uncertain — an unexpected state, a decisio
 - **Do you want me to investigate further?** — or do you already have the answer
 
 I then wait. I do not guess or proceed on my own when something is genuinely uncertain.
-
-## Explaining Code to the User
-
-The user is a data scientist, NOT a software engineer. Treat every explanation as if talking to a smart person who has never written code before. These rules are non-negotiable:
-
-- **No jargon without a definition** — the first time you use any technical term in a conversation, immediately follow it with "(meaning: [one plain-English sentence])". Once defined, don't redefine on reuse.
-- **Use real-world analogies** — make concepts concrete. Example: "a function is like a recipe — you give it ingredients, it follows steps, it gives you a dish".
-- **Full context first** — before explaining a change, explain what the file or system does overall. Don't describe the changed line without first describing what it lives inside and why that matters.
-- **Step by step, never summary** — walk through changes one at a time. Never collapse multiple changes into one paragraph. Keep explanations under 10 bullets unless asked for more.
-- **Always end with: "In plain terms: [one sentence — what changed and why it matters to you]"** — this is required after every explanation, even short ones. Never skip it.
-- **The user's job is to decide YES or NO** — give just enough for that decision. If they seem confused, stop and re-explain before continuing.
-- **Never assume understanding** — if something could be unclear, it is unclear. Explain it.
 
 ## Response Style
 
@@ -197,6 +200,6 @@ When in doubt, use the cheaper/faster model. Only upgrade if the task genuinely 
 - Checking git status or logs → `haiku`
 - Any mechanical or execution-only task → `haiku`
 
-**Non-trivial means:** touches more than one file, adds a new function or feature, or changes behavior the user would notice. Single-line fixes, typos, and config tweaks do NOT require the Architect.
+**Non-trivial means:** touches more than one file, adds a new function or feature, requirements are unclear, or outcome is hard to reverse. Single-line fixes, typos, and config tweaks do NOT require the Architect.
 
 Spawn agents in parallel when tasks are independent. Never spawn an agent for a simple single Glob/Grep — do those directly.
