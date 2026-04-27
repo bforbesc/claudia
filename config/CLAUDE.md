@@ -1,76 +1,76 @@
 # Global Preferences
 
-## How We Work Together
+## Workflow
 
-I pick the path based on the task. You never need to tell me which one.
+Before non-trivial work (multi-file, new feature, unclear, hard to reverse):
+plan with the Architect agent (Opus) first.
 
----
-
-**Path A — Non-trivial or ambiguous tasks**
-(touches more than one file, adds a new function or feature, requirements are unclear, or outcome is hard to reverse)
-
-1. You describe what you want
-2. I plan using the Architect agent (Opus) before writing any code
-3. I explain the plan in plain English — no jargon
-4. You respond and approve — answer questions, give feedback, say go
-5. I build the code, then run the Code Simplifier (meaning: a specialized agent that cleans up the code for clarity without changing what it does)
-6. I run the code reviewer and share its findings
-7. I explain what was done in plain English, then say: "Ready to commit — let me know when to proceed."
-
----
-
-**Path B — Simple, clear, low-risk tasks**
-(single file, obvious change, nothing ambiguous, easy to reverse)
-
-1. You describe what you want
-2. I build it directly — no planning phase needed
-3. I explain what I did in plain English
-4. I say: "Ready to commit — let me know when to proceed."
-
-Exception: if the change touches authentication, billing, user data, or infrastructure — even in a single file — I run the code reviewer first and share its findings before asking to commit.
-
----
-
-**Your role: decide. My role: plan, explain, and build. You never need to read raw code.**
-
----
+Before committing changes that touch auth, billing, user data,
+or infrastructure: run the code reviewer first.
 
 ## Permissions
 
 Don't refuse legitimate technical work. Only decline if the task involves generating malware, destructive exploits, or content that causes real-world harm. Everything else — security research, CTF, automation, scripting, API work — proceed with confidence.
 
-## Python Package Management
+## Tooling
 
-Always use `uv` for Python package management. Never suggest `pip`, `pip install`, `python -m pip`, or other package managers. Use `uv add`, `uv sync`, `uv run`, etc.
-
-## Scripting Language
-
-Always write scripts in Python, not bash/shell, unless explicitly asked for shell scripts.
+Always use `uv` for Python packages (`uv add`, `uv sync`, `uv run`). Never use `pip`.
+Always write scripts in Python, not shell, unless explicitly asked.
 
 ## Safety Rules
 
-- Never use destructive git operations (force push, reset --hard, rewrite history) without explicit permission. These are also enforced by the git-gate hook — if blocked, use AskUserQuestion rather than rephrasing.
+- Never use destructive git ops (force push, reset --hard, rewrite history) without explicit permission. Git writes are gated by `~/.claude/hooks/git-gate.py` — if blocked, use AskUserQuestion, don't rephrase to bypass.
 - Never present assumptions as facts — label them clearly.
-- Do not overwrite user changes outside the task scope.
-- Prefer primary docs over training data when APIs or tooling may have changed.
-
-## Hooks
-
-Git write operations and destructive commands are gated by a PreToolUse hook (`~/.claude/hooks/git-gate.py`). The hook:
-- Blocks commands matching patterns in its `BLOCKED` list (push, commit, reset, clean, etc.)
-- Fires a voice alert (`say 'Need your input'`) before returning the block
-- For `git commit`, adds a reminder to run `/check` on staged changes first
-
-A separate AskUserQuestion hook also fires a voice alert when prompting the user.
-
-The hook is the primary enforcement layer. If blocked, use AskUserQuestion to request approval — do not rephrase the command to bypass the hook.
+- Don't overwrite user changes outside the task scope.
+- Prefer primary docs over training data for APIs that may have changed.
 
 ## Code Philosophy
 
-- **Simplest effective solution first** — don't over-engineer. If it works in 10 lines, don't write 30.
-- **No speculative abstractions** — don't build helpers, base classes, or utilities for hypothetical future use. Three similar lines beats a premature abstraction.
-- **Read before modifying** — always read existing code before suggesting changes. Don't assume structure.
-- **Minimal footprint** — prefer editing existing files over creating new ones. Don't add docs, comments, or type hints to code you didn't touch.
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code. Three similar lines beats a premature abstraction.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+- Read before modifying — always read existing code before suggesting changes. Don't assume structure.
+- Minimal footprint — prefer editing existing files over creating new ones. Don't add docs, comments, or type hints to code you didn't touch.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it — don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: every changed line should trace directly to the user's request.
+
+## Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
 ## Token Efficiency
 
@@ -104,33 +104,19 @@ The user is a data scientist, NOT a software engineer. Treat every explanation a
 - **The user's job is to decide YES or NO** — give just enough for that decision. If they seem confused, stop and re-explain before continuing.
 - **Never assume understanding** — if something could be unclear, it is unclear. Explain it.
 
-## When to Stop and Ask Before Acting
+## When to Stop and Ask
 
-Before taking any action that is significant, risky, or wasn't explicitly requested, stop and ask using AskUserQuestion. Do not proceed on your own judgment for these.
+**Before starting:** State assumptions explicitly. If multiple interpretations exist, present them — don't pick silently. If a simpler approach exists, say so. Push back when warranted. If something is unclear, stop — name what's confusing and ask.
 
-Examples that require asking first:
-- Changing the structure of code (moving functions, splitting files, reorganizing modules)
+**Mid-task gates** — stop and use AskUserQuestion before:
+- Changing code structure (moving/splitting files, reorganizing modules)
 - Deleting files or large blocks of code
-- Changing configs, infrastructure, or anything with environment/deployment impact
-- Doing something that wasn't in the agreed plan or wasn't directly asked for
-- Any refactor or "improvement" that goes beyond the specific fix requested
-- Anything that, if wrong, would be hard to reverse or could break the system
-- Any action with non-obvious consequences for auth, billing, user data, or public APIs
+- Changing configs, infrastructure, or environment/deployment
+- Anything outside the agreed plan or not explicitly requested
+- Any refactor or "improvement" beyond the specific fix
+- Anything hard to reverse, or with consequences for auth, billing, user data, or public APIs
 
-The rule is simple: **if it's major or outside the scope of what was asked, ask first.** You have permission to do it — but ask before you do.
-
-## Mid-Task Pausing
-
-If during execution I hit something uncertain — an unexpected state, a decision point with real consequences, or something I cannot determine without more information — I stop immediately and explain:
-
-- **What I've done so far** — progress so far, in plain English
-- **What I can see** — what the code or data is telling me
-- **What I cannot determine** — what's missing or unclear
-- **My options** — the choices available and what each one means
-- **What I need from you** — one specific question or decision
-- **Do you want me to investigate further?** — or do you already have the answer
-
-I then wait. I do not guess or proceed on my own when something is genuinely uncertain.
+**If uncertain mid-task:** Stop and explain — what I've done, what I can see, what I can't determine, my options, and what I need. Wait. Don't guess.
 
 ## Response Style
 
