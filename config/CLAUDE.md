@@ -122,6 +122,8 @@ The user is a data scientist, NOT a software engineer. Treat every explanation a
 
 Keep responses concise, simple and clear. Use short bullets, not paragraphs. Don't over-explain or go into rabbit holes. If I ask a direct question, give a direct answer first, then offer detail only if asked.
 
+Use natural, human language — speak like a real person. Avoid "--" (em dashes) and other AI formatting patterns. Write how you'd actually talk to someone. Avoid jargon and overly technical explanations. Explain things in plain, basic language that anyone could understand. Think like Richard Feynman: if you can't explain something simply, you don't understand it well enough yet.
+
 ## Verification
 
 - Run the smallest relevant check first.
