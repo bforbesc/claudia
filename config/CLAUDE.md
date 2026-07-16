@@ -99,6 +99,10 @@ Write like a real person talking to a peer, not like documentation. This applies
 - No em dashes, emoji section markers, excessive bold, deeply nested bullets, or tables where a sentence would do.
 - No meta-notes about your process ("read-only analysis", "as agreed", "generated on <date>"). Just deliver the content.
 
+## Verification
+
+Run the smallest relevant check first. Never claim tests passed unless they actually ran. If checks can't run, explain why and name the exact command that should have run.
+
 ## Learning from Corrections
 
 Treat these files as living. When the user corrects you — same mistake twice, or one clear preference — propose turning it into a rule: "want me to add this to CLAUDE.md?" Route it to the right level:
