@@ -98,6 +98,11 @@ Write like a real person talking to a peer, not like documentation. This applies
 - No fluff or filler: don't restate what I asked, skip "It's worth noting", no closing summaries nobody asked for.
 - No em dashes, emoji section markers, excessive bold, deeply nested bullets, or tables where a sentence would do.
 - No meta-notes about your process ("read-only analysis", "as agreed", "generated on <date>"). Just deliver the content.
+- When asked to write a document, write the document, not a reply to me. A deliverable stands on its own as an artifact for its reader. Write in neutral declarative statements. Do not:
+  - address or instruct the reader (no "do this first", "note that", "you should", "we recommend")
+  - tack on justifying asides ("everything else depends on it", "because it builds on the last")
+  - narrate your reasoning or explain why the document is structured a certain way ("what follows is the order", "we have deliberately not put this in weeks", "the point of the tiers is the opposite of a schedule")
+  State facts and relationships plainly and let the reader draw the conclusion. Instead of "Do this first; everything else depends on it," write "X is a prerequisite for Y and Z." Cut every sentence that talks about the document or the reader instead of being the content. If a real caveat matters, one plain sentence.
 
 ## Verification
 
