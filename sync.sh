@@ -10,10 +10,11 @@ cp "$CLAUDE/settings.json"           "$REPO/config/settings.json"
 cp "$CLAUDE/statusline-command.sh"   "$REPO/config/statusline-command.sh"
 
 # Sync custom skills (only files already tracked — won't add new ones automatically)
-for skill in check handoff pr pr-comments resolve-conflicts switch; do
+for skill in check freeze-plan handoff pr pr-comments prep-pr resolve-conflicts triage walkthrough; do
   src="$CLAUDE/skills/$skill/SKILL.md"
   dst="$REPO/skills/$skill/SKILL.md"
   if [ -f "$src" ]; then
+    mkdir -p "$REPO/skills/$skill"
     cp "$src" "$dst"
   fi
 done
