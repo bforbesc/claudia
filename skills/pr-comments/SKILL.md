@@ -1,10 +1,12 @@
 ---
 name: pr-comments
-description: Summarize all PR comments and reviews, recommend which are worth addressing.
+description: Fetch and summarize all comments and reviews on the current pull request.
 allowed-tools: Bash, Read, Grep, Glob
 ---
 
-You are reviewing comments on a pull request. Fetch all comments, summarize them, and help the user decide which to act on.
+You are collecting comments on a pull request. Fetch them all and summarize what each one says.
+
+Don't rank them, don't judge whether they're worth addressing, and don't recommend what to act on. Prioritizing is `/triage`'s job — run it on this output when the user wants a worked checklist. Keeping collection separate from judgement means the user sees the full picture before anything gets filtered out.
 
 ## 1. Find the PR
 
@@ -28,33 +30,21 @@ gh api repos/{owner}/{repo}/pulls/<number>/comments
 For each comment or review thread:
 
 - **Author**: who left it
+- **Where**: `file:line` for inline comments, or "top-level" for PR-wide ones
 - **Comment**: one-line summary of what they said
-- **Verdict**: ✅ Worth addressing / ⚠️ Consider / ❌ Skip
-- **Reason**: one sentence — why it matters or doesn't
 
-### Verdict criteria
-
-- **✅ Worth addressing**: Real bug, correctness issue, security problem, missing edge case, or blocking review request from a maintainer.
-- **⚠️ Consider**: Valid but debatable — naming that genuinely helps readability, minor API design suggestions, small perf wins. Worth doing if easy.
-- **❌ Skip**: Pure style/formatting preference, nitpicks, "could also do it this way" with no clear benefit, redundant with another comment.
+Preserve every comment. Don't merge near-duplicates or drop nitpicks — a comment that looks trivial to you may be the one the user cares about, and this output is the raw material for whatever comes next.
 
 ### Output format
 
-Group by verdict. Lead with ✅ items.
+Group by thread, in the order they were left.
 
-**PR #<number> — Comment Summary**
+**PR #<number> — Comments (N total)**
 
-**✅ Worth addressing (N)**
-- @author: "<summary>" → reason
+- @author — `file:line` — "<summary>"
 
-**⚠️ Consider (N)**
-- @author: "<summary>" → reason
+Note the current `reviewDecision` at the end (approved, changes requested, or pending).
 
-**❌ Skip (N)**
-- @author: "<summary>" → reason
+## 4. Stop there
 
-**Recommendation**: Brief overall guidance on what to address.
-
-## 4. Ask what to do
-
-After presenting the summary, ask the user which items they want to address. Do not start making changes without confirmation.
+Present the summary and stop. Don't make changes. If the user wants these prioritized into a checklist, point them at `/triage`.

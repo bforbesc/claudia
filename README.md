@@ -26,10 +26,14 @@ forbes-crew/
 │   └── statusline-command.sh   # Custom status bar script
 ├── skills/
 │   ├── check/
+│   ├── freeze-plan/
 │   ├── handoff/
 │   ├── pr/
 │   ├── pr-comments/
-│   └── resolve-conflicts/
+│   ├── prep-pr/
+│   ├── resolve-conflicts/
+│   ├── triage/
+│   └── walkthrough/
 └── sync.sh                     # Pull live ~/.claude files into this repo
 ```
 
@@ -58,10 +62,14 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 | Skill | What it does |
 |-------|-------------|
 | `check` | Reviews staged/unstaged changes for bugs, broken references, and runtime errors. Ignores style. |
+| `freeze-plan` | Writes an approved plan to `agent-docs/plans/` as the first commit on the branch. The plan section is immutable; later runs update status and append deviations. |
 | `handoff` | Synthesizes conversation context, opens a new VS Code terminal with the other account, and passes the context automatically. |
 | `pr` | Stages, commits, pushes, and opens a PR — or adds a follow-up comment if one already exists. |
-| `pr-comments` | Fetches all PR comments and reviews, summarizes them, and recommends which ones are worth addressing. |
+| `pr-comments` | Fetches all PR comments and reviews and summarizes them. No ranking — that's `triage`. |
+| `prep-pr` | Inspects the branch before a PR: diff size, callers that weren't updated, scope creep against the plan, verification checklist. Reports only; changes nothing. |
 | `resolve-conflicts` | Summarizes merge conflicts, resolves the obvious ones automatically, and asks about the ambiguous ones. |
+| `triage` | Groups review findings into a P1/P2/P3 checklist. Runs `/code-review` first if there's nothing to triage yet. Terminal only — never posts to GitHub. |
+| `walkthrough` | Traces one subsystem end to end into `agent-docs/walkthroughs/`, with code snippets captured from the real files rather than retyped. |
 
 ## Plugins
 
