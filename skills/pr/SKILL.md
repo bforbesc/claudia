@@ -6,6 +6,32 @@ allowed-tools: Read, Grep, Glob, Bash, Edit, Write
 
 You are managing a pull request. First detect whether a PR already exists for this branch, then follow the appropriate flow.
 
+## How to write the PR description (read this first)
+
+Everything you write into a PR body or comment must follow these rules. The goal is text that reads like a thoughtful teammate explaining the change in person — not a machine-generated report.
+
+**Voice**
+- Write to a smart colleague who was *not* in the code with you. Lead with the real-world effect, not the code mechanics.
+- One idea per sentence. Keep sentences short. Use active voice and present tense.
+- Name what actually happens for a user or the system, not the lines you edited. The reviewer can already read the diff — tell them what it *means*.
+- Spell out any acronym the first time, except universal ones (API, URL, PR, CI).
+- If a section has nothing real to say, write one honest sentence (e.g. "No major trade-offs — this is a straightforward change."). Never pad to fill space.
+
+**Never use these words/phrases** — they are the tell-tale signs of machine-generated text:
+> leverage, utilize, facilitate, robust, seamless, comprehensive, enhance, streamline, functionality, in order to, "this PR/commit", "various", "several improvements", "refactored" (without saying what and why)
+
+**Don't** narrate the diff line by line. **Don't** invent "key decisions" that were never real choices.
+
+**One example — the same change, written badly then well:**
+
+❌ Bad (jargon, narrates the diff, no human meaning):
+> This PR refactors the authentication handler to leverage a more robust email normalization approach. Implemented `.lower()` invocation on the email field in order to facilitate case-insensitive matching, enhancing overall login functionality.
+
+✅ Good (plain, names the real effect, flags the risk):
+> Logins were failing for people whose email had uppercase letters. We now lowercase the email before checking it against the database, so "Bob@x.com" and "bob@x.com" are treated as the same account.
+>
+> Worth a look: the migration that normalises existing emails — it touches every user row.
+
 ## 0. Detect mode
 
 ```
@@ -52,25 +78,26 @@ EOF
 git push -u origin HEAD
 ```
 
+Write every section using the voice rules above.
+
 ```
 gh pr create --title "<title>" --base develop --body "$(cat <<'EOF'
 ## What changed
-<One plain-English sentence. No jargon. Assume the reader has zero context.>
+<One or two sentences in plain English. Say what is now different for a user or the system. Assume the reader has zero context on this branch.>
 
 ## Why
-<The problem this solves or the goal it achieves. One or two sentences.>
+<The problem this fixes or the goal it reaches. What was wrong or missing before?>
 
 ## Key decisions
-- <Decision 1: what was chosen and why — written so a non-engineer can understand>
-- <Decision 2 if applicable>
+- <Only genuine choices where you picked one path over another, and the reason. If there were none, write: "No major trade-offs — straightforward change." Do not invent decisions.>
 
 ## What to review
-<What the reviewer should specifically look at. One or two sentences.>
+<The one or two spots that most deserve a careful look — risky changes, anything touching shared data, anything you're unsure about. If it's all low-risk, say so.>
 EOF
 )"
 ```
 
-No checklists, no footers, no "Co-Authored-By".
+No checklists, no footers, no "Co-Authored-By". Re-read your draft once: if any banned word slipped in, or a sentence narrates the diff instead of its meaning, rewrite it.
 
 ### 5. Print the PR URL
 
@@ -116,11 +143,11 @@ git push
 
 ### 4. Post follow-up comment
 
-Post a comment summarising what changed in this follow-up:
+Post a comment summarising what changed in this follow-up. Use the voice rules at the top — plain, short, no jargon, name the real effect.
 
 ```
 gh pr comment <number> --body "$(cat <<'EOF'
-<2–4 sentence summary of what was changed in response to review, and any decisions made>
+<2–4 sentences: what review feedback you addressed and what you changed because of it. Lead with the feedback, then what you did about it. No diff narration.>
 EOF
 )"
 ```

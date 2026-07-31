@@ -6,6 +6,30 @@ allowed-tools: Bash, Read, Edit, Write, Grep, Glob, AskUserQuestion
 
 You are resolving merge conflicts. Your job is to understand each conflict, resolve the obvious ones, and ask about the ambiguous ones.
 
+## 0. Fetch remote and surface conflicts
+
+First, fetch the latest remote state and simulate the merge so you catch conflicts that are visible on GitHub but not yet local:
+
+```bash
+git fetch origin
+```
+
+Detect the base branch (prefer the PR target, fall back to `develop`):
+
+```bash
+BASE=$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || echo "develop")
+echo "Merging against: origin/$BASE"
+```
+
+Attempt the merge without committing:
+
+```bash
+git merge --no-commit --no-ff origin/$BASE 2>&1
+```
+
+- If the merge completes cleanly → no conflicts, report clean and stop. Run `git merge --abort` to leave the repo unchanged.
+- If the merge reports conflicts → proceed to step 1.
+
 ## 1. Identify conflicts
 
 ```
@@ -43,7 +67,7 @@ Always state assumptions and rationale for every resolution, even unambiguous on
 - **Unambiguous conflicts**: Resolve them directly using Edit. State what you did and why in the summary.
 - **Ambiguous conflicts**: Ask the user how to proceed. Present the two sides clearly and suggest options if you can, but do not pick one without confirmation.
 
-## 5. Verify
+## 5. Verify and complete
 
 After resolving all conflicts:
 
@@ -51,6 +75,25 @@ After resolving all conflicts:
 git diff --name-only --diff-filter=U
 ```
 
-Confirm zero remaining conflicts. If any remain, go back to step 2 for those files.
+If any remain, go back to step 2 for those files.
 
-Do NOT stage or commit — leave that to the user.
+Once all conflict markers are gone, complete the merge:
+
+```bash
+git add <resolved files>
+GIT_EDITOR=true git merge --continue
+```
+
+Then push so the PR on GitHub reflects the resolved state:
+
+```bash
+git push
+```
+
+Finally, confirm the PR is mergeable:
+
+```bash
+gh pr view --json mergeable,mergeStateStatus -q '{mergeable: .mergeable, status: .mergeStateStatus}'
+```
+
+Report the final status to the user. If `mergeable` is `MERGEABLE`, the conflicts are fully cleared on GitHub.
