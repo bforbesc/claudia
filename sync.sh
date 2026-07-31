@@ -9,7 +9,8 @@ cp "$CLAUDE/CLAUDE.md"               "$REPO/config/CLAUDE.md"
 cp "$CLAUDE/settings.json"           "$REPO/config/settings.json"
 cp "$CLAUDE/statusline-command.sh"   "$REPO/config/statusline-command.sh"
 
-# Sync custom skills (only files already tracked — won't add new ones automatically)
+# Sync custom skills. Add a name to this list when you create a new skill —
+# nothing outside the list is copied.
 for skill in check freeze-plan handoff pr pr-comments prep-pr resolve-conflicts triage walkthrough; do
   src="$CLAUDE/skills/$skill/SKILL.md"
   dst="$REPO/skills/$skill/SKILL.md"
