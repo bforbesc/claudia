@@ -63,7 +63,7 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 |-------|-------------|
 | `check` | Reviews staged/unstaged changes for bugs, broken references, and runtime errors. Ignores style. |
 | `freeze-plan` | Writes an approved plan to `agent-docs/plans/` as the first commit on the branch. The plan section is immutable; later runs update status and append deviations. |
-| `handoff` | Synthesizes conversation context, opens a new VS Code terminal with the other account, and passes the context automatically. |
+| `handoff` | Writes the conversation context to a dated document in `~/Desktop/handoffs` and prints the path, so a fresh session can pick the work up. |
 | `pr` | Stages, commits, pushes, and opens a PR — or adds a follow-up comment if one already exists. |
 | `pr-comments` | Fetches all PR comments and reviews and summarizes them. No ranking — that's `triage`. |
 | `prep-pr` | Inspects the branch before a PR: diff size, callers that weren't updated, scope creep against the plan, verification checklist. Reports only; changes nothing. |
@@ -127,9 +127,8 @@ claude-bfc      # /login → personal account
 ```
 
 **Switching when you hit the cap:**
-1. `/handoff` — fully automated: synthesizes context, opens a new VS Code terminal with the other account, and passes the context as the first prompt. Zero manual steps.
-
-**Prerequisite:** Grant accessibility permissions to VS Code in **System Settings → Privacy & Security → Accessibility** (needed for AppleScript to open terminals).
+1. Run `/handoff`. It writes a handoff document to `~/Desktop/handoffs` and prints the full path.
+2. Start the other account (`claude-bfc`, or `claude` if you're switching back) and point it at that path as the first prompt.
 
 ## Keeping in sync
 
@@ -140,7 +139,7 @@ claude-bfc      # /login → personal account
 git add -A && git commit -m "sync config" && git push
 ```
 
-`sync.sh` only touches tracked files — it won't pull in anything unexpected.
+`sync.sh` only copies the files named inside it, so nothing unexpected gets pulled in. When you add a skill, add its name to the list in `sync.sh` or it won't be picked up.
 
 ## Migrating to a new machine
 
