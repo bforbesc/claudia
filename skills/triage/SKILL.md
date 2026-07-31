@@ -1,7 +1,7 @@
 ---
 name: triage
 description: Groups code review findings into a prioritized private checklist. Run after /code-review.
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash, Read, Grep, Glob, Skill
 ---
 
 You are turning a pile of review findings into a checklist the user can work through in priority order.
@@ -10,7 +10,7 @@ You are turning a pile of review findings into a checklist the user can work thr
 
 The findings from the preceding `/code-review` output. Comments fetched by `/pr-comments` work as input too — there, the comment author stands in for the review agent.
 
-If there are no findings in the conversation yet, run `/code-review` first, then triage its output. Reuse findings that are already there rather than re-running — a second review costs real time and won't return an identical list, so the checklist would stop matching the review the user just read.
+If there are no findings in the conversation yet, invoke the `code-review:code-review` skill first, then triage its output. Reuse findings that are already there rather than re-running — a second review costs real time and won't return an identical list, so the checklist would stop matching the review the user just read.
 
 ## Output only to the terminal
 
@@ -34,8 +34,11 @@ Defaults hold unless there's a specific reason to move something. When you do mo
 
 ```bash
 git config user.email
-git log <base>..HEAD --format=%ae | sort -u
+base=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|origin/||')
+git log "${base:-main}"..HEAD --format=%ae | sort -u
 ```
+
+If the base branch can't be detected, check which of `main`/`develop`/`master` exists and say which one you used.
 
 Only ask the user if the result is mixed or empty.
 
