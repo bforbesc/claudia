@@ -85,8 +85,8 @@ Currently switched on in `settings.json`:
 | `code-review` | Inline `/code-review` command |
 | `pr-review-toolkit` | Full PR review suite: `code-reviewer`, `silent-failure-hunter`, `comment-analyzer`, and more |
 | `skill-creator` | Create, improve, and benchmark custom skills |
-| `aws-agents` | AWS knowledge and documentation agents |
-| `sagemaker-ai` | SageMaker workflows |
+| `aws-agents` | Build, deploy, and operate AI agents on AWS: Bedrock AgentCore, MCP gateways, multi-agent orchestration, evaluation, observability |
+| `sagemaker-ai` | Build, train, and deploy models across the Amazon SageMaker AI surface |
 
 Installed but switched off, kept around for when they're useful: `explanatory-output-style`, `learning-output-style`, `code-simplifier`, `claude-md-management`, `commit-commands`, `claude-code-setup`, `superpowers`, `context7`, `github`, `playwright`, `hookify`, `remember`, `ralph-loop`, `greptile`, `codex`, `deploy-on-aws`, `pydantic-ai`, `aws-core`, `aws-dev-toolkit`, `aws-serverless`.
 
