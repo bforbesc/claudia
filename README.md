@@ -92,7 +92,7 @@ Installed but switched off, kept around for when they're useful: `explanatory-ou
 
 ### MCP servers
 
-Configured directly in `~/.claude.json` rather than through plugins, so they load regardless of which plugins are on: `context7` (live library docs), `github` (issues, PRs, repos), `aws-docs`, `aws-core`, `aws-cdk`, `aws-pricing`, and `strands`.
+Configured directly in `~/.claude.json` rather than through plugins, so they don't depend on which plugins are on. Connecting: `context7` (live library docs), `github` (issues, PRs, repos), `aws-docs`, `aws-pricing`, `strands`. Configured but currently failing to connect: `aws-core`, `aws-cdk`. Check with `claude mcp list`.
 
 ## Multiple accounts
 
