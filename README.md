@@ -13,7 +13,8 @@ All Claude Code config lives under `~/.claude/`:
 | `~/.claude/CLAUDE.md` | Global instructions loaded at the start of every session |
 | `~/.claude/settings.json` | Model, hooks, permissions, enabled plugins |
 | `~/.claude/statusline-command.sh` | Custom status bar script |
-| `~/.claude/hooks/` | Hook scripts referenced by `settings.json` (not synced to this repo) |
+| `~/.claude/hooks/` | Hook scripts referenced by `settings.json` |
+| `~/.claude/agents/<Name>.md` | Custom subagent definitions |
 | `~/.claude/skills/<name>/SKILL.md` | Custom skills, invoked with `/name` |
 | `~/.claude/projects/<path>/memory/MEMORY.md` | Per-project memory index |
 
@@ -25,6 +26,11 @@ claudia/
 │   ├── CLAUDE.md               # Global instructions for all projects
 │   ├── settings.json           # Model, hooks, permissions, plugins
 │   └── statusline-command.sh   # Custom status bar script
+├── hooks/
+│   ├── git-gate.py             # Approve/deny prompt before any git write
+│   └── pr_log.py
+├── agents/
+│   └── Explore.md              # Read-only search subagent, pinned to haiku
 ├── skills/
 │   ├── check/
 │   ├── freeze-plan/
@@ -52,7 +58,7 @@ Hooks are automated behaviors wired into `settings.json` that fire without Claud
 
 | Event | When | What it does |
 |-------|------|-------------|
-| `PreToolUse → Bash` | Before any write git or `gh` command | Runs `~/.claude/hooks/git-gate.py`, which blocks the command, says `"Need your input"` aloud, and tells Claude to ask for approval. For `git commit` it also tells Claude to run `/check` on the staged changes first. |
+| `PreToolUse → Bash` | Before any write git or `gh` command | Runs `hooks/git-gate.py`, which returns `permissionDecision: "ask"` so you get an approve/deny prompt. Read-only git commands pass through untouched. |
 | `PreToolUse → AskUserQuestion` | Before Claude asks a question | Speaks `"Need your input"` aloud |
 | `Stop` | When Claude finishes | Speaks `"Completed..."` aloud |
 
@@ -143,9 +149,7 @@ claude-bfc      # /login → personal account
 git add -A && git commit -m "sync config" && git push
 ```
 
-`sync.sh` only copies the files named inside it, so nothing unexpected gets pulled in. When you add a skill, add its name to the list in `sync.sh` or it won't be picked up.
-
-It does not copy `~/.claude/hooks/`, so the hook scripts that `settings.json` points at live only on this machine.
+`sync.sh` only copies the files named inside it, so nothing unexpected gets pulled in. When you add a skill, hook, or subagent, add its name to the matching list in `sync.sh` or it won't be picked up.
 
 ## Migrating to a new machine
 
@@ -154,8 +158,10 @@ cp config/CLAUDE.md ~/.claude/CLAUDE.md
 cp config/settings.json ~/.claude/settings.json
 cp config/statusline-command.sh ~/.claude/statusline-command.sh && chmod +x ~/.claude/statusline-command.sh
 mkdir -p ~/.claude/skills && cp -r skills/* ~/.claude/skills/
+mkdir -p ~/.claude/hooks && cp hooks/* ~/.claude/hooks/
+mkdir -p ~/.claude/agents && cp agents/* ~/.claude/agents/
 ```
 
 Plugins aren't included here — reinstall them from the Claude Code marketplace using the list above.
 
-Hook scripts aren't included either. `settings.json` references `~/.claude/hooks/git-gate.py`, so copy that across too or the git gate silently stops gating.
+A new `~/.claude/agents/` directory isn't detected by a running session, so restart Claude Code after that last line.

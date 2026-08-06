@@ -20,5 +20,22 @@ for skill in check freeze-plan handoff pr pr-comments prep-pr resolve-conflicts 
   fi
 done
 
+# Sync hook scripts. settings.json points at these by path, so a machine
+# without them silently loses the behaviour.
+for hook in git-gate.py pr_log.py; do
+  if [ -f "$CLAUDE/hooks/$hook" ]; then
+    mkdir -p "$REPO/hooks"
+    cp "$CLAUDE/hooks/$hook" "$REPO/hooks/$hook"
+  fi
+done
+
+# Sync subagent definitions.
+for agent in Explore.md; do
+  if [ -f "$CLAUDE/agents/$agent" ]; then
+    mkdir -p "$REPO/agents"
+    cp "$CLAUDE/agents/$agent" "$REPO/agents/$agent"
+  fi
+done
+
 echo "Synced. Review with: git diff"
 echo "Commit with:         git add -A && git commit -m 'sync config'"
