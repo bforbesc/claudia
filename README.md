@@ -1,4 +1,4 @@
-# 🤖 Claudia's 
+# 🤖 Claudia
 
 My Claude Code setup. Because even AI needs a good manager.
 
@@ -13,13 +13,14 @@ All Claude Code config lives under `~/.claude/`:
 | `~/.claude/CLAUDE.md` | Global instructions loaded at the start of every session |
 | `~/.claude/settings.json` | Model, hooks, permissions, enabled plugins |
 | `~/.claude/statusline-command.sh` | Custom status bar script |
+| `~/.claude/hooks/` | Hook scripts referenced by `settings.json` (not synced to this repo) |
 | `~/.claude/skills/<name>/SKILL.md` | Custom skills, invoked with `/name` |
 | `~/.claude/projects/<path>/memory/MEMORY.md` | Per-project memory index |
 
 ## What's in this repo
 
 ```
-forbes-crew/
+claudia/
 ├── config/
 │   ├── CLAUDE.md               # Global instructions for all projects
 │   ├── settings.json           # Model, hooks, permissions, plugins
@@ -39,9 +40,9 @@ forbes-crew/
 
 ## Config
 
-**`CLAUDE.md`** is the instruction file Claude loads at session start. Because it's prompt-cached, anything in here costs almost nothing after the first turn — so it's the right place for rules you'd otherwise repeat every conversation. Mine covers: permissions, code style, token efficiency, plan mode behavior, safety rules, and agent routing with model assignments.
+**`CLAUDE.md`** is the instruction file Claude loads at session start. It's the right place for rules you'd otherwise repeat every conversation. It loads into every session's context, so keep it tight — Anthropic's guidance is under 200 lines, because longer files eat context and get followed less reliably. Mine covers: autonomy and when to ask, planning, tooling, safety, grounding, code philosophy, communication and response style, review behavior, commits, and agent routing.
 
-**`settings.json`** controls Claude Code at runtime: the default model (`sonnet`), which tools auto-approve without prompting, hooks, and which plugins are active. Subagents get their model set per-task (`opus` for planning and review, `haiku` for search and exploration).
+**`settings.json`** controls Claude Code at runtime: the default model (`opus`), which tools auto-approve without prompting, hooks, and which plugins are active. Subagents inherit the session model unless a task deliberately downgrades them (`haiku` for search and other mechanical work).
 
 **`statusline-command.sh`** powers the status bar at the bottom of the terminal. It shows the active model name, a color-coded progress bar for context window usage (green → orange → red), and rate limit usage for the 5-hour and 7-day windows. Turns red at 80% so you know when you're about to hit a wall. 📊
 
@@ -51,9 +52,11 @@ Hooks are automated behaviors wired into `settings.json` that fire without Claud
 
 | Event | When | What it does |
 |-------|------|-------------|
-| `PreToolUse → Bash` | Before any `git commit` | Runs `/check` to catch bugs before they're committed |
-| `PostToolUse → AskUserQuestion` | After Claude asks a question | Speaks `"Need your input"` aloud |
+| `PreToolUse → Bash` | Before any write git or `gh` command | Runs `~/.claude/hooks/git-gate.py`, which blocks the command, says `"Need your input"` aloud, and tells Claude to ask for approval. For `git commit` it also tells Claude to run `/check` on the staged changes first. |
+| `PreToolUse → AskUserQuestion` | Before Claude asks a question | Speaks `"Need your input"` aloud |
 | `Stop` | When Claude finishes | Speaks `"Completed..."` aloud |
+
+Blocked commands: `git push`, `pull`, `commit`, `reset`, `rebase`, `merge`, `restore`, `clean`, `stash drop`, `branch -d/-D`, `tag -d/-f`, `checkout --`/`checkout .`, and `gh pr create/merge/close`.
 
 ## Skills
 
@@ -75,20 +78,21 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 
 Not stored here — the code belongs to the marketplace authors. Install via `/plugins` in Claude Code.
 
+Currently switched on in `settings.json`:
+
 | Plugin | What it provides |
 |--------|-----------------|
-| `explanatory-output-style` | Adds `★ Insight` blocks for educational output |
-| `code-simplifier` | Simplifies recently changed code for clarity |
-| `claude-md-management` | Audits and improves CLAUDE.md files |
-| `skill-creator` | Create, improve, and benchmark custom skills |
-| `commit-commands` | `/commit`, `/commit-push-pr`, `/clean_gone` shortcuts |
+| `code-review` | Inline `/code-review` command |
 | `pr-review-toolkit` | Full PR review suite: `code-reviewer`, `silent-failure-hunter`, `comment-analyzer`, and more |
-| `claude-code-setup` | Recommends hooks, agents, and MCP servers for your workflow |
-| `context7` | Live library and framework docs via MCP |
-| `code-review` | Inline code review command |
-| `github` | GitHub MCP — manage issues, PRs, and repos from Claude |
-| `playwright` | Browser automation via MCP |
-| `superpowers` | Brainstorming, TDD, systematic debugging, git worktrees, and more |
+| `skill-creator` | Create, improve, and benchmark custom skills |
+| `aws-agents` | AWS knowledge and documentation agents |
+| `sagemaker-ai` | SageMaker workflows |
+
+Installed but switched off, kept around for when they're useful: `explanatory-output-style`, `learning-output-style`, `code-simplifier`, `claude-md-management`, `commit-commands`, `claude-code-setup`, `superpowers`, `context7`, `github`, `playwright`, `hookify`, `remember`, `ralph-loop`, `greptile`, `codex`, `deploy-on-aws`, `pydantic-ai`, `aws-core`, `aws-dev-toolkit`, `aws-serverless`.
+
+### MCP servers
+
+Configured directly in `~/.claude.json` rather than through plugins, so they load regardless of which plugins are on: `context7` (live library docs), `github` (issues, PRs, repos), `aws-docs`, `aws-core`, `aws-cdk`, `aws-pricing`, and `strands`.
 
 ## Multiple accounts
 
@@ -141,6 +145,8 @@ git add -A && git commit -m "sync config" && git push
 
 `sync.sh` only copies the files named inside it, so nothing unexpected gets pulled in. When you add a skill, add its name to the list in `sync.sh` or it won't be picked up.
 
+It does not copy `~/.claude/hooks/`, so the hook scripts that `settings.json` points at live only on this machine.
+
 ## Migrating to a new machine
 
 ```bash
@@ -151,3 +157,5 @@ mkdir -p ~/.claude/skills && cp -r skills/* ~/.claude/skills/
 ```
 
 Plugins aren't included here — reinstall them from the Claude Code marketplace using the list above.
+
+Hook scripts aren't included either. `settings.json` references `~/.claude/hooks/git-gate.py`, so copy that across too or the git gate silently stops gating.
