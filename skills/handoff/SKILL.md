@@ -1,9 +1,8 @@
 ---
 name: handoff
 description: Summarise the current conversation into a handoff document saved to ~/Desktop/handoffs, so a fresh agent can pick up the work later. Use when the user says /handoff, "hand off", "running out of tokens", "continue in new session", or "pass context".
-argument-hint: "What will the next session focus on?"
 disable-model-invocation: true
-allowed-tools: Bash, Write
+allowed-tools: Bash, Write, Read
 ---
 
 Write a handoff document summarising the current conversation so a fresh agent can continue the work.
@@ -30,7 +29,7 @@ Synthesise from the conversation. Omit any section that is empty — don't pad.
 - **Work done** — what's already complete.
 - **Next steps** — what the next session should do.
 - **Open questions** — anything unresolved.
-- **Suggested skills** — skills the next agent should invoke (e.g. `/grill-me`, `/pr`).
+- **Suggested skills** — skills the next agent should invoke (e.g. `/grilling`, `/open-pr`).
 
 ## Rules
 

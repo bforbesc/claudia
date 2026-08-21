@@ -1,5 +1,5 @@
 ---
-name: resolve-conflicts
+name: resolve-pr-conflicts
 description: Summarize merge conflicts, resolve unambiguous ones automatically, ask about ambiguous ones.
 allowed-tools: Bash, Read, Edit, Write, Grep, Glob, AskUserQuestion
 ---
@@ -14,12 +14,16 @@ First, fetch the latest remote state and simulate the merge so you catch conflic
 git fetch origin
 ```
 
-Detect the base branch (prefer the PR target, fall back to `develop`):
+The PR states its own base. Ask it, and do not guess:
 
 ```bash
-BASE=$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || echo "develop")
+BASE=$(gh pr view --json baseRefName -q .baseRefName)
 echo "Merging against: origin/$BASE"
 ```
+
+Empty or failed? Stop and say so. A default here merges against the wrong branch and
+reports the conflicts of a merge nobody asked for, which looks exactly like a real
+result. This user's repos use both `main` and `develop`, so there is no safe guess.
 
 Attempt the merge without committing:
 

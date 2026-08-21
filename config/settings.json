@@ -60,13 +60,13 @@
     "context7@claude-plugins-official": false,
     "code-simplifier@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": false,
-    "skill-creator@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": false,
     "commit-commands@claude-plugins-official": false,
-    "code-review@claude-plugins-official": true,
+    "code-review@claude-plugins-official": false,
     "superpowers@claude-plugins-official": false,
     "github@claude-plugins-official": false,
     "playwright@claude-plugins-official": false,
-    "pr-review-toolkit@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": false,
     "claude-code-setup@claude-plugins-official": false,
     "codex@openai-codex": false,
     "deploy-on-aws@claude-plugins-official": false,
@@ -78,9 +78,8 @@
     "aws-serverless@claude-plugins-official": false,
     "pydantic-ai@claude-plugins-official": false,
     "aws-core@claude-plugins-official": false,
-    "aws-dev-toolkit@claude-plugins-official": false,
-    "aws-agents@claude-plugins-official": true,
-    "sagemaker-ai@claude-plugins-official": true
+    "aws-agents@claude-plugins-official": false,
+    "sagemaker-ai@claude-plugins-official": false
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
@@ -90,6 +89,7 @@
       }
     }
   },
+  "effortLevel": "high",
   "advisorModel": "opus",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
