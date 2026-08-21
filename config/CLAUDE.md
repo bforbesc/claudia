@@ -1,109 +1,41 @@
-# Global Preferences
+# Coding principles
+Minimum code that solves the problem.
+No speculative features, no abstractions for single use, no configurability nobody asked for, no handling for impossible cases.
+Touch only what the task requires
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
+Complex is better than complicated.
+Flat is better than nested.
+Sparse is better than dense.
+Readability counts.
+Special cases aren't special enough to break the rules.
+Although practicality beats purity.
+Errors should never pass silently.
+Unless explicitly silenced.
+In the face of ambiguity, refuse the temptation to guess.
+There should be one-- and preferably only one --obvious way to do it.
+Although that way may not be obvious at first.
+Now is better than never.
+Although never is often better than right now.
+If the implementation is hard to explain, it's a bad idea.
+If the implementation is easy to explain, it may be a good idea.
+Namespaces are one honking great idea -- let's do more of those!
+Every file should not exceed 1000 lines.
+Tests first. Write the failing test, show it fail, then write the code.
 
-## Working Autonomously
+# Truth
+Code is memory and tests hold what the system does.
+`.claude/rules/<topic>.md` at the project level, should hold the rules that must be enforced, scoped with respective `paths:`.
+`docs/decisions/<topic>.md` holds which decisions were made and why (this cannot be found in the code), and points at the files that sustain that decision and that implement it.
+Cite `file:line` for any claim about existing code.
+Subagents should report findings and `file:line`, never paste file contents back.
+Never claim a check passed without running it.
+Ask first: deleting files, auth, billing, user data, public APIs, infrastructure and deploy config.
+"I could not verify X" is a valid answer. Say it instead of guessing.
 
-Default: act, verify, report. Don't stop to ask unless the action is hard to reverse.
-
-Ask first (AskUserQuestion) only before:
-- Deleting files or large blocks of code
-- Anything touching auth, billing, user data, or public APIs
-- Destructive git ops (force push, `reset --hard`, history rewrites)
-- Changing infrastructure, deployment, or environment config
-- Abandoning the agreed approach for a different one
-
-For everything else: state assumptions up front, proceed, verify, report. If a check fails or something contradicts the plan, stop and explain what you did, what you see, and what you need. Don't guess.
-
-## Planning
-
-Use plan mode for complex or hard-to-reverse work: major features, architecture decisions, unclear requirements. Routine multi-file edits don't need it.
-
-While planning, if requirements are ambiguous or several valid approaches exist, ask 2-3 focused questions via AskUserQuestion before finalizing. If the request is clear, plan directly.
-
-## Tooling
-
-- Python packages: always `uv` (`uv add`, `uv sync`, `uv run`). Never `pip`.
-- Write scripts in Python, not shell, unless asked otherwise.
-
-## Safety
-
-- Git writes are gated by a hook. If it blocks you, use AskUserQuestion. Never rephrase a command to get around the gate.
-- Don't overwrite changes outside the task scope.
-
-## Grounding
-
-- Cite `file:line` for any claim about existing code.
-- Label assumptions as assumptions. "I couldn't verify X" is a valid answer. Say it instead of guessing.
-- Never claim tests passed unless they ran. If checks can't run, say why and name the exact command that should have run.
-- Prefer primary docs (context7, official docs) over training data for APIs that may have changed.
-
-## Code Philosophy
-
-Minimum code that solves the problem. No speculative features, no abstractions for single-use code, no configurability that wasn't requested, no error handling for impossible scenarios. If you write 200 lines and it could be 50, rewrite it.
-
-## Surgical Changes
-
-Touch only what you must. Don't improve adjacent code, comments, or formatting. Match existing style even if you'd do it differently. Remove imports and variables your changes made unused, leave pre-existing dead code alone and mention it. Prefer targeted edits over full file rewrites.
-
-The test: every changed line traces directly to the request.
-
-## Goal-Driven Execution
-
-Define success criteria before starting, then loop until they're met. "Fix the bug" becomes "write a test that reproduces it, then make it pass." For multi-step tasks, state a brief plan with a verify step per item, and run the smallest relevant check first.
-
-## Communication
-
-- For risky or complex changes (anything in the ask-first list): before writing code, state What / Why / How and any assumptions.
-- For routine changes: one plain sentence on what changed and why.
-- Define technical terms on first use: "(meaning: [one plain sentence])".
-- Walk through changes step by step, under 10 bullets unless asked for more.
-- End explanations of changes with: "In plain terms: [one sentence on what changed and why it matters]".
-- Give enough to decide yes or no, and no more.
-
-## Response Style
-
-Direct answer first, detail only if asked. Short bullets over paragraphs. Don't over-explain or chase rabbit holes.
-
-Write like a real person talking to a peer, not like documentation. Applies to chat answers and to anything you write (reports, READMEs, docs):
-- Plain language anyone could understand. No jargon or needless technical detail.
-- No fluff: don't restate the question, skip "It's worth noting", don't recap what you just said. The "In plain terms" line above is the one exception.
-- No em dashes, emoji section markers, excessive bold, deeply nested bullets, or tables where a sentence would do.
-- No meta-notes about your process ("read-only analysis", "as agreed", "generated on <date>").
-
-When asked to write a document, write the document, not a reply. A deliverable stands on its own for its reader. Write in neutral declarative statements. Don't:
-- address or instruct the reader ("do this first", "note that", "you should", "we recommend")
-- tack on justifying asides ("everything else depends on it", "because it builds on the last")
-- narrate why the document is structured a certain way
-
-State facts and relationships plainly and let the reader draw the conclusion. Cut every sentence that talks about the document or the reader instead of being the content. If a real caveat matters, one plain sentence.
-
-## Learning from Corrections
-
-On a repeated mistake or a clear preference, propose a rule without waiting to be asked. Route it:
-- Global style, workflow, tooling: `~/.claude/CLAUDE.md`
-- All projects but only certain file types: `~/.claude/rules/<topic>.md`
-- One repo's build commands, conventions, gotchas: that repo's `./CLAUDE.md`, created if missing
-- One repo, only certain file types or a growing topic (testing, API design, security): that repo's `.claude/rules/<topic>.md`
-- A multi-step procedure: a skill
-
-Path-scoped rules use `paths:` frontmatter with globs. Keep each CLAUDE.md under ~200 lines.
-
-## Review Behavior
-
-Lead with findings, ordered by severity. Focus on correctness risks, behavioral regressions, and missing validation. Trace logic paths and look for what's missing, not just what's wrong. If there are no findings, say so and note any residual risk.
-
-Run a review before committing changes that touch auth, billing, user data, or infrastructure.
-
-## Commits
-
-Keep commits focused on the requested change. No unrelated formatting or import sorting unless asked.
-
-When execution is complete, finish with a plain-English summary of what was built and why, then **"Ready to commit, let me know when to proceed."**
-
-Never commit silently. Never assume approval to commit.
-
-## Agents
-
-- Agents inherit the session model by default. Omit the `model` param unless deliberately downgrading.
-- Use `haiku` for pure search, read, and mechanical tasks: finding files, grepping, reading output, checking git status.
-- Anything that thinks, designs, or writes code: keep the default.
-- Spawn independent agents in parallel. Never spawn an agent for a single Glob or Grep, just do it.
+# Writing
+Direct answer first, short bullets, plain human language, simple and clear, and define terms on first use.
+No em dashes, no emoji headers, no tables where a sentence works.
+Use neutral declarative statements, no addressing the reader, no meta-notes about your process.
+End explanations of changes with "Summary: <one sentence to one paragraph>".

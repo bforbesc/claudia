@@ -1,52 +1,73 @@
 ---
 name: freeze-plan
-description: Records an approved plan as a durable artifact for session handoff and team review. Run once, immediately after approving a plan.
-allowed-tools: Read, Write, Edit, Bash
+description: Store the plan this conversation produced to docs/decisions/<topic>.md, stamped with the commit it was written against, as the specification /agent-developer builds from. Use when the user says /freeze-plan or is comfortable with a plan and wants it locked before code.
+allowed-tools: Read, Grep, Glob, Bash, Write
 ---
 
-You are turning an approved plan into a durable artifact — one that survives this session and can be read by someone who was never in it.
+You store the plan this conversation produced. That is the whole job.
 
-## Where it goes
+The plan was written by the planner and argued over by the user. The pushback already
+happened. Do not re-check it, do not improve it, do not add a requirement it does not
+have. A plan you edited on the way in is a plan nobody agreed to.
 
-`agent-docs/plans/<topic>.md`, where `<topic>` is a short kebab-case name for the work. Create the directory if it doesn't exist.
+If the plan is missing a section, say which and stop. That is the user's to fill.
 
-## First run — the file does not exist
+## 1. Write it
 
-Write:
+`docs/decisions/<topic>.md`. If a file is already there, do not overwrite it: report
+it and show what you would have written.
 
 ```markdown
-Owner: <the user>
-Approved: <today's date> — agent-drafted, human-approved
-Branch: <current branch name, from `git rev-parse --abbrev-ref HEAD`>
+# <the decision>
+Owner: <the user>. Date: <today>. Branch: <git rev-parse --abbrev-ref HEAD>.
+Frozen at: <git rev-parse HEAD>.
 
-## Plan
-<the approved plan, verbatim>
+## Decision
+One or two sentences.
 
-## Status
-Status: not started
-Done:
-Remaining:
-How to continue:
+## Why
+The constraint that forced it. The alternative rejected, and what it cost.
 
-## Deviations
+## Requirements
+- R1 — <one falsifiable behaviour> — `tests/test_thing.py::test_the_behaviour`
+
+## Design
+<interfaces and boundaries, each decision citing the R-ids it closes>
+
+## Tasks
+1. <one red-green slice: write the test, see it fail, then the minimum code> — closes R1
+
+## Planned files
+- `path/to/file.py` — what it will hold, and whether it exists today
 ```
 
-Then commit it as the first commit on the branch.
+Requirements, Design and Tasks come from the plan as it stands. Decision and Why come
+from the conversation: the framing agreed before the planner ran, one or two sentences
+each. Planned files is the file list the plan implies, and if the plan does not imply
+one, say so rather than inventing it.
 
-Git writes are gated by `~/.claude/hooks/git-gate.py`. If the commit is blocked, do not rephrase the command to get around the gate — report that the file is written but uncommitted, and give the exact command to run.
+`Frozen at` is the commit the plan was written against, and the only machine-checkable
+part of this file. `/agent-developer` compares it to `HEAD` and refuses to build
+against a moved tree.
 
-## Later runs — the file already exists
+## 2. What frozen means
 
-Do not overwrite it. Update `## Status` in place, append to `## Deviations`, and then state plainly what you changed.
+Nothing above is rewritten. `/agent-developer` appends what the build learned:
+`## Where it lives` with `file:line` per R-id, `## Risks accepted`, `## Deviations`.
 
-`## Plan` is immutable. Never edit it, on this run or any later one. Its value comes entirely from being the unaltered record of what was agreed — the moment it can be quietly rewritten to match what was built, it stops being evidence of anything. Divergence from the plan is real information: record it under `## Deviations`, with what changed and why.
+The gap between what this file planned and what the build appended is the record worth
+keeping, and it disappears the moment someone edits the plan to match the code. A plan
+that turns out to be wrong is not edited: the build records it under Deviations, or the
+work stops and this file gets `## Abandoned` with the reason.
 
-## Write for a stranger
+This is the only file the workflow writes, and it exists because `/review-pr` runs in a
+fresh session with no memory of the build. Without it, nothing can check whether the
+code did what was promised.
 
-The reader is a teammate, a stakeholder, or a fresh session with no memory of this conversation. Assume they know the repository but not this work.
+There is no `docs/plans/`. Three places hold truth: this file for why, `.claude/rules/`
+for what must be enforced, and the code and tests for what the system does.
 
-- No shorthand, no references to "the conversation" or "as discussed"
-- Name files by path, not "the file we changed"
-- `How to continue` must be runnable by someone who wasn't here: the exact next action, the command to run, the file to open
+## Then stop
 
-Test it before saving: if a sentence only makes sense to someone who was in this session, rewrite it.
+Report the path and the `Frozen at` commit. Do not write tests, do not write code, do
+not open a PR. The next step is `/agent-developer <topic>`.
