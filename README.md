@@ -133,45 +133,17 @@ All of them are currently switched off. `pr-review-toolkit` used to supply `code
 
 Configured directly in `~/.claude.json` rather than through plugins, so they don't depend on which plugins are on. Connecting: `context7` (live library docs), `github` (issues, PRs, repos), `aws-docs`, `aws-pricing`, `strands`. Configured but currently failing to connect: `aws-core`, `aws-cdk`. Check with `claude mcp list`.
 
-## Multiple accounts
+## Local model
 
-Two commands, two accounts, both running simultaneously if needed:
+`claude-local` (a `~/.zshrc` function, not stored here) runs Claude Code against a
+model served locally by Ollama (`qwen3.5:35b-mlx`, Apple's MLX engine) instead of the
+Anthropic API. It auto-starts Ollama if it isn't running and pre-warms the model
+before handing off to `claude`.
 
-| Command | Account |
-|---------|---------|
-| `claude` | Work account (`~/.claude/`) |
-| `claude-bfc` | Personal account (`~/.claude-bfc/`) |
-
-The setup below symlinks `CLAUDE.md`, `settings.json`, skills, projects and plugins so both accounts read one source of truth, with auth kept separate per account. The symlinks are per machine and are not created by anything in this repo.
-
-**Setup on a new machine:**
-
-```bash
-# Create the personal config dir
-mkdir -p ~/.claude-bfc
-
-# Symlink shared config (auth files are separate per account)
-ln -s ~/.claude/CLAUDE.md ~/.claude-bfc/CLAUDE.md
-ln -s ~/.claude/settings.json ~/.claude-bfc/settings.json
-ln -s ~/.claude/skills ~/.claude-bfc/skills
-ln -s ~/.claude/projects ~/.claude-bfc/projects
-ln -s ~/.claude/plugins ~/.claude-bfc/plugins
-ln -s ~/.claude/statusline-command.sh ~/.claude-bfc/statusline-command.sh
-
-# Add alias to ~/.zshrc
-echo "alias claude-bfc='CLAUDE_CONFIG_DIR=~/.claude-bfc claude'" >> ~/.zshrc
-source ~/.zshrc
-```
-
-Then authenticate each account once:
-```bash
-claude          # /login → work account
-claude-bfc      # /login → personal account
-```
-
-**Switching when you hit the cap:**
-1. Run `/handoff`. It writes a handoff document to `~/Desktop/handoffs` and prints the full path.
-2. Start the other account (`claude-bfc`, or `claude` if you're switching back) and point it at that path as the first prompt.
+It points `CLAUDE_CONFIG_DIR` at `~/.claude-local/`, which symlinks `CLAUDE.md`,
+`skills/`, and `statusline-command.sh` back to `~/.claude/` so both configs share one
+source of truth, with its own `settings.json` (dark theme, low effort — the local
+model is slower) and its own `plugins/` and `projects/`.
 
 ## Keeping in sync
 
