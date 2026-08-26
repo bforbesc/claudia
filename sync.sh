@@ -7,7 +7,7 @@ CLAUDE="$HOME/.claude"
 
 # Everything this repo publishes is named here. Nothing outside these lists is
 # copied, so a new skill, hook or agent stays private until you add it.
-SKILLS="agent-developer agent-scaffold freeze-plan handoff humanizer open-pr pay-tech-debt resolve-pr-conflicts review-pr walkthrough"
+SKILLS="agent-developer agent-scaffold decision-review freeze-plan handoff humanizer open-pr pay-tech-debt resolve-pr-conflicts review-pr walkthrough"
 HOOKS="git-gate.py"
 AGENTS="Explore.md code-reviewer.md comment-analyzer.md implementer.md security-scanner.md silent-failure-hunter.md test-writer.md"
 
@@ -27,6 +27,11 @@ for skill in $SKILLS; do
   if [ -f "$src" ]; then
     mkdir -p "$REPO/skills/$skill"
     cp "$src" "$REPO/skills/$skill/SKILL.md"
+  fi
+  # A skill's SKILL.md may point at files under references/, so those travel too.
+  if [ -d "$CLAUDE/skills/$skill/references" ]; then
+    mkdir -p "$REPO/skills/$skill/references"
+    cp -R "$CLAUDE/skills/$skill/references/." "$REPO/skills/$skill/references/"
   fi
 done
 

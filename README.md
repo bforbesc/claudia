@@ -57,6 +57,7 @@ claudia/
 ├── skills/
 │   ├── agent-developer/
 │   ├── agent-scaffold/
+│   ├── decision-review/
 │   ├── freeze-plan/
 │   ├── handoff/
 │   ├── humanizer/
@@ -95,6 +96,7 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 | Skill | What it does |
 |-------|-------------|
 | `walkthrough` | Traces a scoped part of the codebase end to end, in the conversation. Writes no file: line-numbered snippets of code you're about to edit rot immediately, and re-running this costs less than reading a stale copy. |
+| `decision-review` | Interrogates you about a pending engineering decision, then pressure-tests it against 56 laws of software engineering and ends with a recommendation and a tripwire. Invoke-only: it never fires because a decision came up in conversation. |
 | `freeze-plan` | Stores the plan the conversation produced to `docs/decisions/<topic>.md`, stamped with the commit it was written against. It stores and does not validate — the argument already happened. |
 | `agent-scaffold` | Sets a repo up for agentic work: project `CLAUDE.md`, a `justfile` with `verify`, a line-count gate, `.claude/rules/` and `docs/decisions/`. Run it once per repo before anything else. |
 | `agent-developer` | Builds a frozen plan through a fixed chain: write the tests, watch them fail for the right reason, implement, verify, scan, review, then append where each requirement landed. Never edits the plan. |
