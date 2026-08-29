@@ -73,7 +73,7 @@ claudia/
 
 **`CLAUDE.md`** is the instruction file Claude loads at session start. It's the right place for rules you'd otherwise repeat every conversation. It loads into every session's context, so keep it tight — Anthropic's guidance is under 200 lines, because longer files eat context and get followed less reliably. Mine is 40 lines: the Zen of Python as the code philosophy, a 1000-line cap per file, tests first, where truth lives, what to ask about before doing, and how to write.
 
-**`settings.json`** controls Claude Code at runtime: the default model (`opus`), effort level, which tools auto-approve without prompting, hooks, and which plugins are active. Subagents don't inherit any of that — every agent file pins its own `model` and `effort`, so a session on Opus still runs the mechanical work on Sonnet or Haiku.
+**`settings.json`** controls Claude Code at runtime: the default model (`opus`), effort level, which tools auto-approve without prompting, hooks, and which plugins are active. Subagents don't inherit any of that — every agent file pins its own `model`, and all but `Explore` pin an `effort`, so a session on Opus still runs the mechanical work on Sonnet or Haiku.
 
 **`statusline-command.sh`** powers the status bar at the bottom of the terminal. It shows the active model name, a color-coded progress bar for context window usage (green → orange → red), and rate limit usage for the 5-hour and 7-day windows. Turns red at 80% so you know when you're about to hit a wall.
 
@@ -101,13 +101,13 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 | `agent-scaffold` | Sets a repo up for agentic work: project `CLAUDE.md`, a `justfile` with `verify`, a line-count gate, `.claude/rules/` and `docs/decisions/`. Run it once per repo before anything else. |
 | `agent-developer` | Builds a frozen plan through a fixed chain: write the tests, watch them fail for the right reason, implement, verify, scan, review, then append where each requirement landed. Never edits the plan. |
 | `open-pr` | Opens a PR for the current branch, or takes in an existing one's review comments and answers them one thread at a time. Inspects the branch first and stops for you to decide. |
-| `review-pr` | Reviews a PR as a principal engineer with four specialist subagents, from a PR number, link, or the branch you cloned. Reports in the terminal; posts only the findings you name. |
+| `review-pr` | Reviews a PR as a principal engineer with three specialists across four subagents, from a PR number, link, or the branch you cloned. Reports in the terminal; posts only the findings you name. |
 | `pay-tech-debt` | Measures debt in a scope you name — a path, a PR, a commit range, a subsystem — then pays one item with the tests green on both sides and no behaviour change. |
 | `resolve-pr-conflicts` | Summarizes merge conflicts, resolves the obvious ones automatically, and asks about the ambiguous ones. |
 | `handoff` | Writes the conversation context to a dated document in `~/Desktop/handoffs` and prints the path, so a fresh session can pick the work up. |
 | `humanizer` | Rewrites text that reads as machine-generated, based on Wikipedia's "Signs of AI writing." Third-party, MIT licensed. `open-pr` and `review-pr` both run their drafts through it before anything reaches GitHub, so it isn't optional. |
 
-Two skills in my live config are deliberately absent here: one carries an employer's take-home challenge and its grading rubric, the other describes where a specific client engagement's context lives. `sync.sh` names both and says why, so a future sync doesn't quietly pick them up.
+The eleven above are everything in `~/.claude/skills/`. `sync.sh` publishes only the skills its list names, and its comments name two employer-specific skills, with the reason each is excluded, so a future sync doesn't quietly pick them up if they come back.
 
 ## Subagents
 
