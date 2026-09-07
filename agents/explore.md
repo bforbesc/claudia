@@ -1,5 +1,5 @@
 ---
-name: Explore
+name: explore
 description: Read-only agent for searching and understanding a codebase. Use for file discovery, code search, and tracing how something works when the answer means sweeping many files and only the conclusion is needed. Does not review or audit code, and never edits.
 tools: Read, Glob, Grep, Bash, WebFetch, WebSearch, ToolSearch
 model: haiku
