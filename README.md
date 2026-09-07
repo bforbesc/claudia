@@ -47,7 +47,7 @@ claudia/
 ├── hooks/
 │   └── git-gate.py             # Approve/deny prompt before any git write
 ├── agents/                     # Seven subagents, one job each
-│   ├── Explore.md
+│   ├── explore.md
 │   ├── code-reviewer.md
 │   ├── comment-analyzer.md
 │   ├── implementer.md
@@ -121,7 +121,7 @@ Seven agents, one job each. Skills name them in backticks rather than describing
 | `silent-failure-hunter` | sonnet, medium | Swallowed errors, empty catch blocks, fallbacks that hide a failure. |
 | `security-scanner` | sonnet, medium | Secrets, injection, authorization, data exposure. |
 | `comment-analyzer` | sonnet, medium | Whether comments and `docs/decisions/` entries still match the code they point at. |
-| `Explore` | haiku | Read-only search across many files when only the conclusion is needed. |
+| `explore` | haiku | Read-only search across many files when only the conclusion is needed. |
 
 Each one resolves its own scope explicitly, because a subagent starts with an empty context and a git-status snapshot from the parent session. Handed a PR, it runs the exact `gh pr diff <number> -R <repo>` command it was given; handed nothing, it reads the working tree and says so. An empty diff is reported as an empty diff, never as a clean pass.
 

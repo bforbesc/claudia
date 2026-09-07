@@ -79,6 +79,15 @@ Two stopping conditions, in order:
 
 Only continue past both.
 
+Then ask for what the repo does not hold. If there is no `docs/decisions/` entry
+covering this change, the criteria you are about to judge against live somewhere
+else: a plan document, a design doc, a frozen test corpus. Ask the user for it
+before §3, in one message, and say what you will use it for. A staged migration is
+the case that bites, because the stage boundaries and the pass condition for each
+stage exist only in that document, and without it every finding about scope is a
+guess. A corpus held outside the repo is worth asking for by name, since "the test
+suite passes" and "the corpus covers this" are different claims.
+
 ## 3. Send in the three specialists
 
 Spawn them in parallel, one message. They run on Sonnet and return findings,
@@ -106,7 +115,7 @@ Their output is a private checklist for you, not for the PR.
 
 ## 4. Judge it yourself
 
-Their findings are input. These four questions are yours, and no specialist
+Their findings are input. These six questions are yours, and no specialist
 answers them:
 
 - **Did it meet its own success criteria?** Take them from the PR description or
@@ -124,8 +133,35 @@ answers them:
   fine if it is flagged. Unflagged is a finding.
 - **What is missing?** A path with no test, an error case nobody handles, a caller
   that kept the old expectations.
+- **Who else calls the code it changed?** Take the blast radius from the imports,
+  never from the branch name or the PR title. A shared module changed on a feature
+  branch reaches every caller, including the paths the description promises are
+  untouched. Grep the changed symbols across the repo. A diff that looks scoped to
+  one subsystem and is not is the finding the specialists are least likely to bring
+  you, because each of them sees only the diff.
+- **Is the code it replaces still the thing to compare against?** A new definition
+  that diverges from the handler it supersedes is only a defect if that handler is
+  still the reference. Check whether an earlier PR in the sequence already moved
+  that logic elsewhere. Measuring a diff against code that has already been
+  superseded produces a confident finding the author will correctly reject.
 
 ## 5. Report
+
+Open with the summary, not the findings. Two short paragraphs, plain language, no
+`file:line`:
+
+- **What it does.** What the PR changes and why, in two or three sentences, in the
+  terms someone who has not read the diff would use. Name the file count and the
+  size.
+- **The issues.** One plain sentence per major finding. What breaks, and for whom.
+  Not the mechanism and not the citation, that is what the list below is for.
+
+Someone should be able to read those two paragraphs and nothing else, and know
+whether to care. If the reader comes back asking "so what is actually wrong",
+the summary failed and the priority list will not rescue it. That question,
+asked more than once, is the signal you wrote a citation dump.
+
+Then the findings:
 
 ```
 P1 - CRITICAL (must fix)
@@ -200,8 +236,16 @@ For the items they named:
   the review `body` with the path written out, and keep the `comments` array to
   lines the diff actually touches. Callers left behind and stale
   `docs/decisions/` entries usually land here.
+- Re-open every `file:line` in the batch and confirm the file says what your
+  comment claims. Line numbers drift, a symbol you remembered at one line lives at
+  another, and a field you are certain a document records may turn out not to be in
+  it. A wrong citation is worse than no citation, because it moves the burden of
+  proof back to you and the author stops trusting the rest of the review. Check
+  every one, not the ones you happen to doubt.
 - Run the whole batch through the `humanizer` skill in embedded mode, which returns
-  the final text and nothing else. Post what it returns, not your draft.
+  the final text and nothing else. Post what it returns, not your draft. Lead each
+  comment with the point in plain language and put the citations behind it. A
+  comment that opens with a path reads as a machine wrote it.
 
 One submission, so the author gets one notification instead of one per finding:
 
@@ -221,6 +265,14 @@ EOF
 have: ask, and post the user's words.
 
 Then print the PR URL.
+
+Found a mistake in a review you already posted, before the author replied? Correct
+it in place. Do not add a comment about a comment, and do not append a retraction
+under the wrong one. The review body is
+`PUT /repos/<repo>/pulls/<number>/reviews/<review-id>`, where `PATCH` returns 404.
+An inline comment is `PATCH /repos/<repo>/pulls/comments/<comment-id>`. Withdrawing
+a finding means rewriting or deleting it, and the count of comments the author has
+to read should go down, not up.
 
 ## Second round: the author replied
 
