@@ -73,7 +73,7 @@ claudia/
 
 **`CLAUDE.md`** is the instruction file Claude loads at session start. It's the right place for rules you'd otherwise repeat every conversation. It loads into every session's context, so keep it tight — Anthropic's guidance is under 200 lines, because longer files eat context and get followed less reliably. Mine is 40 lines: the Zen of Python as the code philosophy, a 1000-line cap per file, tests first, where truth lives, what to ask about before doing, and how to write.
 
-**`settings.json`** controls Claude Code at runtime: the default model (`opus`), effort level, which tools auto-approve without prompting, hooks, and which plugins are active. Subagents don't inherit any of that — every agent file pins its own `model`, and all but `Explore` pin an `effort`, so a session on Opus still runs the mechanical work on Sonnet or Haiku.
+**`settings.json`** controls Claude Code at runtime: the default model (`opus`), effort level, which tools auto-approve without prompting, hooks, and which plugins are active. Subagents don't inherit any of that — every agent file pins its own `model`, and all but `explore` pin an `effort`, so a session on Opus still runs the mechanical work on Sonnet or Haiku.
 
 **`statusline-command.sh`** powers the status bar at the bottom of the terminal. It shows the active model name, a color-coded progress bar for context window usage (green → orange → red), and rate limit usage for the 5-hour and 7-day windows. Turns red at 80% so you know when you're about to hit a wall.
 
