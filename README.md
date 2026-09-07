@@ -47,7 +47,7 @@ claudia/
 ├── hooks/
 │   └── git-gate.py             # Approve/deny prompt before any git write
 ├── agents/                     # Seven subagents, one job each
-│   ├── explore.md
+│   ├── explorer.md
 │   ├── code-reviewer.md
 │   ├── comment-analyzer.md
 │   ├── implementer.md
@@ -73,7 +73,7 @@ claudia/
 
 **`CLAUDE.md`** is the instruction file Claude loads at session start. It's the right place for rules you'd otherwise repeat every conversation. It loads into every session's context, so keep it tight — Anthropic's guidance is under 200 lines, because longer files eat context and get followed less reliably. Mine is 40 lines: the Zen of Python as the code philosophy, a 1000-line cap per file, tests first, where truth lives, what to ask about before doing, and how to write.
 
-**`settings.json`** controls Claude Code at runtime: the default model (`opus`), effort level, which tools auto-approve without prompting, hooks, and which plugins are active. Subagents don't inherit any of that — every agent file pins its own `model`, and all but `explore` pin an `effort`, so a session on Opus still runs the mechanical work on Sonnet or Haiku.
+**`settings.json`** controls Claude Code at runtime: the default model (`opus`), effort level, which tools auto-approve without prompting, hooks, and which plugins are active. Subagents don't inherit any of that — every agent file pins its own `model`, and all but `explorer` pin an `effort`, so a session on Opus still runs the mechanical work on Sonnet or Haiku.
 
 **`statusline-command.sh`** powers the status bar at the bottom of the terminal. It shows the active model name, a color-coded progress bar for context window usage (green → orange → red), and rate limit usage for the 5-hour and 7-day windows. Turns red at 80% so you know when you're about to hit a wall.
 
@@ -121,7 +121,7 @@ Seven agents, one job each. Skills name them in backticks rather than describing
 | `silent-failure-hunter` | sonnet, medium | Swallowed errors, empty catch blocks, fallbacks that hide a failure. |
 | `security-scanner` | sonnet, medium | Secrets, injection, authorization, data exposure. |
 | `comment-analyzer` | sonnet, medium | Whether comments and `docs/decisions/` entries still match the code they point at. |
-| `explore` | haiku | Read-only search across many files when only the conclusion is needed. |
+| `explorer` | haiku | Read-only search across many files when only the conclusion is needed. |
 
 Each one resolves its own scope explicitly, because a subagent starts with an empty context and a git-status snapshot from the parent session. Handed a PR, it runs the exact `gh pr diff <number> -R <repo>` command it was given; handed nothing, it reads the working tree and says so. An empty diff is reported as an empty diff, never as a clean pass.
 
