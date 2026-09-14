@@ -46,6 +46,12 @@ Two things this prevents, both silent:
 
 Never leave a `gh pr` or `gh api` call bare in this skill.
 
+Then check `baseRefName` against the repo's default branch. When they differ, this
+PR is one link in a stack, and `gh pr diff` returns only what that link adds. The
+description will usually cover the whole stage, naming files, tests and modules that
+live in the base branch and are not yours to review. Say which branch the base is,
+and judge the diff you were handed rather than the one the description implies.
+
 ## 1. Get the PR and what people already said
 
 ```bash
@@ -79,6 +85,12 @@ Two stopping conditions, in order:
 
 Only continue past both.
 
+Then check the description against the diff itself. Both conditions above pass on a
+rich description that is about a different change: the stage this PR belongs to, the
+branch below it, work still to come. When the files, hooks or tests it names are not
+in the diff, that gap is a finding on its own, and every piece of evidence it offers
+belongs to whichever branch actually holds them, not to this one.
+
 Then ask for what the repo does not hold. If there is no `docs/decisions/` entry
 covering this change, the criteria you are about to judge against live somewhere
 else: a plan document, a design doc, a frozen test corpus. Ask the user for it
@@ -111,12 +123,24 @@ one layer down and harder to see.
 An agent that reports an empty diff has reviewed nothing. Re-spawn it with the
 number rather than treating the empty result as a clean pass.
 
+Tell each one to cite line numbers as they appear in the new file, the ones the hunk
+headers of `gh pr diff` count from. An agent that reads a local copy reports that
+copy's numbering, and the §6 re-check then has to locate every citation a second
+time.
+
+Scale the four to the diff. A one-file change to a developer script does not need a
+security scan, and spawning one buys a paragraph confirming nothing was found. Drop
+a specialist when the diff cannot contain what it looks for, and name the one you
+dropped in the report so the reader knows the gap is deliberate.
+
 Their output is a private checklist for you, not for the PR.
 
 ## 4. Judge it yourself
 
-Their findings are input. These six questions are yours, and no specialist
-answers them:
+Their findings are input, and usually the smaller half. These six questions are
+yours, and no specialist answers them. Expect the finding worth the review to come
+from here: each specialist sees only the diff, and every question below is about
+what the diff should be measured against.
 
 - **Did it meet its own success criteria?** Take them from the PR description or
   the matching `docs/decisions/` entry. A PR that works but does something other
@@ -156,10 +180,18 @@ Open with the summary, not the findings. Two short paragraphs, plain language, n
 - **The issues.** One plain sentence per major finding. What breaks, and for whom.
   Not the mechanism and not the citation, that is what the list below is for.
 
+Write both for someone outside the subsystem. Every term the codebase invented, and
+every ordinary word it uses in a local sense, is defined the first time you use it
+or replaced with the plain one. Jargon is what makes a summary unreadable, and by
+§5 you cannot hear it any more, because you have spent the whole review learning to
+speak it.
+
 Someone should be able to read those two paragraphs and nothing else, and know
 whether to care. If the reader comes back asking "so what is actually wrong",
 the summary failed and the priority list will not rescue it. That question,
-asked more than once, is the signal you wrote a citation dump.
+asked more than once, is the signal you wrote a citation dump. Before printing,
+reread the summary as the person who has to act on it. Any sentence that needs a
+definition you did not give gets rewritten, not footnoted.
 
 Then the findings:
 
@@ -247,7 +279,16 @@ For the items they named:
   comment with the point in plain language and put the citations behind it. A
   comment that opens with a path reads as a machine wrote it.
 
-One submission, so the author gets one notification instead of one per finding:
+When nothing in the batch lands on a changed line, there is no inline comment to
+make and no review to submit. Post one plain issue comment instead, which is the
+same thread the author reads and one fewer moving part:
+
+```bash
+gh api repos/<repo>/issues/<number>/comments -f body="<the finding>"
+```
+
+Otherwise one submission, so the author gets one notification instead of one per
+finding:
 
 ```bash
 gh api repos/<repo>/pulls/<number>/reviews --input - <<'EOF'
