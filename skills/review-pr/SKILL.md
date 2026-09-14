@@ -46,7 +46,7 @@ Two things this prevents, both silent:
 
 Never leave a `gh pr` or `gh api` call bare in this skill.
 
-Then check `baseRefName` against the repo's default branch. When they differ, this
+Then read `baseRefName` off that same call. When it is not `master` or `main`, this
 PR is one link in a stack, and `gh pr diff` returns only what that link adds. The
 description will usually cover the whole stage, naming files, tests and modules that
 live in the base branch and are not yours to review. Say which branch the base is,
@@ -128,10 +128,12 @@ headers of `gh pr diff` count from. An agent that reads a local copy reports tha
 copy's numbering, and the §6 re-check then has to locate every citation a second
 time.
 
-Scale the four to the diff. A one-file change to a developer script does not need a
-security scan, and spawning one buys a paragraph confirming nothing was found. Drop
-a specialist when the diff cannot contain what it looks for, and name the one you
-dropped in the report so the reader knows the gap is deliberate.
+Scale the four to the diff, with a trigger rather than a judgement call. Skip
+`security-scanner` when the diff touches no authentication, no user input, no data
+access and no external I/O, which is the usual shape of a change to a developer
+script or a test harness. Spawning it there buys a paragraph confirming nothing was
+found. Name the specialist you skipped in the report, so the reader knows the gap
+was chosen.
 
 Their output is a private checklist for you, not for the PR.
 
