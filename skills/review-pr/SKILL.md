@@ -52,6 +52,15 @@ description will usually cover the whole stage, naming files, tests and modules 
 live in the base branch and are not yours to review. Say which branch the base is,
 and judge the diff you were handed rather than the one the description implies.
 
+Do not assume the stack ends at `master`. Walk it up: run `gh pr list -R <repo>
+--head <baseRefName> --json number,baseRefName` on each base until a base is not
+the head of any open PR. That branch is the trunk, and in a long migration it is
+often a release branch (`release/...`), not `master`. Two comparisons follow from
+it, and they answer different questions: the trunk says what the stack adds, and
+`master` says what reaches production when the trunk merges. The plan document may
+describe the parts as parallel branches off the trunk while the real branches are
+stacked, so trust `baseRefName` over the plan.
+
 ## 1. Get the PR and what people already said
 
 ```bash
@@ -123,6 +132,11 @@ one layer down and harder to see.
 An agent that reports an empty diff has reviewed nothing. Re-spawn it with the
 number rather than treating the empty result as a clean pass.
 
+To read a whole file at the PR head, use `gh api "repos/<repo>/contents/<path>?ref=<headRefName>"
+--jq .content | base64 -d` into the scratchpad, for yourself and in every agent
+prompt. Do not `git fetch`, check out, or run tools inside the user's working tree
+without asking: the user may be mid-work on another branch of the same stack.
+
 Tell each one to cite line numbers as they appear in the new file, the ones the hunk
 headers of `gh pr diff` count from. An agent that reads a local copy reports that
 copy's numbering, and the §6 re-check then has to locate every citation a second
@@ -139,7 +153,7 @@ Their output is a private checklist for you, not for the PR.
 
 ## 4. Judge it yourself
 
-Their findings are input, and usually the smaller half. These six questions are
+Their findings are input, and usually the smaller half. These eight questions are
 yours, and no specialist answers them. Expect the finding worth the review to come
 from here: each specialist sees only the diff, and every question below is about
 what the diff should be measured against.
@@ -164,7 +178,19 @@ what the diff should be measured against.
   branch reaches every caller, including the paths the description promises are
   untouched. Grep the changed symbols across the repo. A diff that looks scoped to
   one subsystem and is not is the finding the specialists are least likely to bring
-  you, because each of them sees only the diff.
+  you, because each of them sees only the diff. Before raising "this also
+  changes X", run `git log --oneline <master>..<head> -S'<symbol>'` to see whether
+  the branch was already changing X. When earlier commits did the same, the PR
+  continues a drift rather than starting one: tell the user, as a branch-wide
+  decision, and on the PR ask only for the measurement that shows its cost.
+- **Is a number a regression or noise?** Model-driven evaluations vary from run to
+  run. Before calling a score drop a regression, find the documented run-to-run
+  spread (the previous stage's decision doc usually records several runs), and
+  raise only drops outside it, or the same case failing on every run.
+- **Does the stack meet the plan's "done when"?** In a staged plan, each part's
+  deliverables are inputs to the next. Check every "done when" item against the
+  branches that should hold it, not just this diff. A gap in the user's own part
+  goes to the user privately, never onto someone else's PR.
 - **Is the code it replaces still the thing to compare against?** A new definition
   that diverges from the handler it supersedes is only a defect if that handler is
   still the reference. Check whether an earlier PR in the sequence already moved
@@ -275,7 +301,10 @@ For the items they named:
   another, and a field you are certain a document records may turn out not to be in
   it. A wrong citation is worse than no citation, because it moves the burden of
   proof back to you and the author stops trusting the rest of the review. Check
-  every one, not the ones you happen to doubt.
+  every one, not the ones you happen to doubt. For a claim that depends on runtime
+  state ("this attribute is never set", "this crashes on turn 3"), trace the state,
+  not only the line: grep for every place that sets it. Specialists read the line
+  they cite and miss the setter three files away.
 - Run the whole batch through the `humanizer` skill in embedded mode, which returns
   the final text and nothing else. Post what it returns, not your draft. Lead each
   comment with the point in plain language and put the citations behind it. A
