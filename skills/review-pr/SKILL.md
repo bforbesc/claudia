@@ -52,14 +52,11 @@ description will usually cover the whole stage, naming files, tests and modules 
 live in the base branch and are not yours to review. Say which branch the base is,
 and judge the diff you were handed rather than the one the description implies.
 
-Do not assume the stack ends at `master`. Walk it up: run `gh pr list -R <repo>
---head <baseRefName> --json number,baseRefName` on each base until a base is not
-the head of any open PR. That branch is the trunk, and in a long migration it is
-often a release branch (`release/...`), not `master`. Two comparisons follow from
-it, and they answer different questions: the trunk says what the stack adds, and
-`master` says what reaches production when the trunk merges. The plan document may
-describe the parts as parallel branches off the trunk while the real branches are
-stacked, so trust `baseRefName` over the plan.
+Ask the user which branch to compare against, and wait for the answer, when either
+holds: `baseRefName` is not `master` or `main`, or the current local branch is not
+the PR's `headRefName`. The right base may be another PR in a stack or a release
+branch, and a session opened on the wrong branch reviews the wrong code. Say what
+you found (the base, the head, the local branch) and ask; do not guess.
 
 ## 1. Get the PR and what people already said
 
@@ -153,7 +150,7 @@ Their output is a private checklist for you, not for the PR.
 
 ## 4. Judge it yourself
 
-Their findings are input, and usually the smaller half. These eight questions are
+Their findings are input, and usually the smaller half. These six questions are
 yours, and no specialist answers them. Expect the finding worth the review to come
 from here: each specialist sees only the diff, and every question below is about
 what the diff should be measured against.
@@ -179,18 +176,10 @@ what the diff should be measured against.
   untouched. Grep the changed symbols across the repo. A diff that looks scoped to
   one subsystem and is not is the finding the specialists are least likely to bring
   you, because each of them sees only the diff. Before raising "this also
-  changes X", run `git log --oneline <master>..<head> -S'<symbol>'` to see whether
+  changes X", run `git log --oneline <base>..<head> -S'<symbol>'` to see whether
   the branch was already changing X. When earlier commits did the same, the PR
   continues a drift rather than starting one: tell the user, as a branch-wide
   decision, and on the PR ask only for the measurement that shows its cost.
-- **Is a number a regression or noise?** Model-driven evaluations vary from run to
-  run. Before calling a score drop a regression, find the documented run-to-run
-  spread (the previous stage's decision doc usually records several runs), and
-  raise only drops outside it, or the same case failing on every run.
-- **Does the stack meet the plan's "done when"?** In a staged plan, each part's
-  deliverables are inputs to the next. Check every "done when" item against the
-  branches that should hold it, not just this diff. A gap in the user's own part
-  goes to the user privately, never onto someone else's PR.
 - **Is the code it replaces still the thing to compare against?** A new definition
   that diverges from the handler it supersedes is only a defect if that handler is
   still the reference. Check whether an earlier PR in the sequence already moved
