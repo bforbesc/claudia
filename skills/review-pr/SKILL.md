@@ -97,12 +97,6 @@ branch below it, work still to come. When the files, hooks or tests it names are
 in the diff, that gap is a finding on its own, and every piece of evidence it offers
 belongs to whichever branch actually holds them, not to this one.
 
-Then ask for what the repo does not hold. If there is no `docs/decisions/` entry
-covering this change, ask the user once, before §3, whether a plan, design doc or
-external test corpus exists, and say what you would use it for. Having none is a
-normal answer: carry on with the PR description as the criteria, and say in the
-report that scope findings are judged against the description alone.
-
 ## 3. Send in the three specialists
 
 Spawn them in parallel, one message. They run on Sonnet and return findings,
@@ -113,8 +107,8 @@ not file contents.
   for swallowed errors, empty catch blocks and fallbacks that hide a failure. Two
   agents, one role.
 - **Security**: `security-scanner`. Secrets, injection, authorization, data exposure.
-- **Documentation**: `comment-analyzer`. Comment accuracy, comment rot, whether
-  anything in `docs/decisions/` still points at code that exists.
+- **Documentation**: `comment-analyzer`. Comment accuracy, comment rot, and docs that
+  still point at code that exists.
 
 Hand each one the resolved `gh pr diff <number> -R <repo>` command verbatim, in the
 prompt. A subagent starts with an empty context and a git-status snapshot from this
@@ -152,13 +146,8 @@ yours, and no specialist answers them. Expect the finding worth the review to co
 from here: each specialist sees only the diff, and every question below is about
 what the diff should be measured against.
 
-- **Did it meet its own success criteria?** Take them from the PR description or
-  the matching `docs/decisions/` entry. A PR that works but does something other
-  than what it set out to do is not done. Where that entry has `## Requirements`
-  with R-ids, this is mechanical: every R-id appears under `## Where it lives`
-  pointing at a real `file:line`, and the test named beside each requirement exists
-  and tests that behaviour. An R-id with no test, or a test that passes while
-  checking something else, is the finding worth the whole review.
+- **Did it meet its own success criteria?** Take them from the PR description. A
+  PR that works but does something other than what it set out to do is not done.
 - **Is the evidence real?** Every claim in the description needs something behind
   it. "Tested locally" with no command and no output is not evidence. Name every
   claim you cannot verify from the PR. This is the single most useful thing you
@@ -227,8 +216,8 @@ the reader can disagree with you.
 FUTURE is for what the review surfaced that this PR is not the place to fix:
 pre-existing debt the diff only made visible, a pattern worth changing repo-wide,
 a design question the author should carry into the next change. Each item says why
-it is out of scope here, and where it belongs — a `docs/decisions/` entry, an
-issue, or the next PR in the sequence.
+it is out of scope here, and where it belongs: an issue or the next PR in the
+sequence.
 
 FUTURE is never a blocker and never a change request. Two limits keep it from
 becoming a dumping ground: nothing goes here that the author could fix in this
@@ -272,8 +261,8 @@ and which are worth another person's round trip.
 
 For the items they named:
 
-- Drop every FUTURE item. It is not a change request. It belongs in a
-  `docs/decisions/` entry or an issue, and §5 already said which.
+- Drop every FUTURE item. It is not a change request. It belongs in an issue or
+  a later PR, and §5 already said which.
 - Draft one comment per item: the problem and the `file:line`, in plain language.
   Leave the priority label out. A reviewer reads "this drops rows when the join
   misses", not "P1 - CRITICAL".
@@ -281,7 +270,7 @@ For the items they named:
   endpoint rejects the whole submission, not just that one. Put those findings in
   the review `body` with the path written out, and keep the `comments` array to
   lines the diff actually touches. Callers left behind and stale
-  `docs/decisions/` entries usually land here.
+  docs usually land here.
 - Re-open every `file:line` in the batch and confirm the file says what your
   comment claims. Line numbers drift, a symbol you remembered at one line lives at
   another, and a field you are certain a document records may turn out not to be in
