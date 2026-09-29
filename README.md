@@ -18,7 +18,9 @@ The skills are a chain, not a menu. Each one hands the next a specific artifact,
    Upkeep          /pay-tech-debt, whenever the pace has left a mess
 ```
 
-The plan file is the load-bearing part. `/freeze-plan` writes it before any code, with one falsifiable requirement per R-id and the test name that will prove each one. `/agent-developer` builds against it and appends where each requirement landed. `/review-pr` then checks the code against a specification it had no hand in writing. Nothing rewrites the plan, so the gap between what was promised and what was built stays visible.
+The plan file is the load-bearing part. `/freeze-plan` writes it before any code, with one falsifiable requirement per R-id and the test name that will prove each one. `/agent-developer` builds against it and appends where each requirement landed. Nothing rewrites the plan, so the gap between what was promised and what was built stays visible.
+
+`/review-pr` stands on its own. It needs no plan and judges any PR against its own description, so it works on PRs that never went through this chain. When the PR's base is not `master` or `main`, or the local branch is not the PR's, it asks which branch to compare against.
 
 Three places hold truth and there is never a fourth: the code and tests for what the system does, `.claude/rules/*.md` for what must be enforced, `docs/decisions/` for why. No plans directory, no walkthrough directory, no agent-facing docs.
 
