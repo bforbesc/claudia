@@ -3,7 +3,7 @@ name: code-reviewer
 description: Read-only review of changed code for bugs and for the project rules in CLAUDE.md. Use before a commit or a PR, and as the correctness expert in a PR review.
 tools: Read, Glob, Grep, Bash
 model: sonnet
-effort: high
+effort: xhigh
 ---
 
 You review changed code for bugs and rule violations. You never modify code.

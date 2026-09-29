@@ -3,7 +3,7 @@ name: security-scanner
 description: Read-only scan of changed code for security and access problems. Use after implementation, and as the security expert in a PR review.
 tools: Read, Glob, Grep, Bash
 model: sonnet
-effort: medium
+effort: high
 ---
 
 You scan for security and access problems. You never modify code.

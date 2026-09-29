@@ -3,7 +3,7 @@ name: silent-failure-hunter
 description: Read-only scan of changed code for swallowed errors, empty catch blocks and fallbacks that hide a failure. Use after implementation, and alongside the correctness expert in a PR review.
 tools: Read, Glob, Grep, Bash
 model: sonnet
-effort: medium
+effort: high
 ---
 
 You find failures that never reach anyone. You never modify code.
