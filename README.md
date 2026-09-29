@@ -117,10 +117,10 @@ Seven agents, one job each. Skills name them in backticks rather than describing
 |-------|-------|-----|
 | `test-writer` | sonnet, max | Writes tests before any implementation exists. Never writes implementation. |
 | `implementer` | sonnet, max | Writes the minimum code that makes existing failing tests pass. Never edits a test. |
-| `code-reviewer` | sonnet, high | Read-only review for bugs and for the rules in `CLAUDE.md`. |
-| `silent-failure-hunter` | sonnet, medium | Swallowed errors, empty catch blocks, fallbacks that hide a failure. |
-| `security-scanner` | sonnet, medium | Secrets, injection, authorization, data exposure. |
-| `comment-analyzer` | sonnet, medium | Whether comments and `docs/decisions/` entries still match the code they point at. |
+| `code-reviewer` | sonnet, xhigh | Read-only review for bugs and for the rules in `CLAUDE.md`. |
+| `silent-failure-hunter` | sonnet, high | Swallowed errors, empty catch blocks, fallbacks that hide a failure. |
+| `security-scanner` | sonnet, high | Secrets, injection, authorization, data exposure. |
+| `comment-analyzer` | sonnet, high | Whether comments and `docs/decisions/` entries still match the code they point at. |
 | `explorer` | haiku | Read-only search across many files when only the conclusion is needed. |
 
 Each one resolves its own scope explicitly, because a subagent starts with an empty context and a git-status snapshot from the parent session. Handed a PR, it runs the exact `gh pr diff <number> -R <repo>` command it was given; handed nothing, it reads the working tree and says so. An empty diff is reported as an empty diff, never as a clean pass.

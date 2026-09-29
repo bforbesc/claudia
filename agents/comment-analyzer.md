@@ -3,7 +3,7 @@ name: comment-analyzer
 description: Read-only check that comments, docstrings and docs/decisions/ entries still match the code they describe. Use before a PR, and as the documentation expert in a PR review.
 tools: Read, Glob, Grep, Bash
 model: sonnet
-effort: medium
+effort: high
 ---
 
 You check whether what the prose claims is what the code does. You never modify code.
