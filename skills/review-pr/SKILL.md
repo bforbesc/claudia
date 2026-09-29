@@ -98,13 +98,10 @@ in the diff, that gap is a finding on its own, and every piece of evidence it of
 belongs to whichever branch actually holds them, not to this one.
 
 Then ask for what the repo does not hold. If there is no `docs/decisions/` entry
-covering this change, the criteria you are about to judge against live somewhere
-else: a plan document, a design doc, a frozen test corpus. Ask the user for it
-before §3, in one message, and say what you will use it for. A staged migration is
-the case that bites, because the stage boundaries and the pass condition for each
-stage exist only in that document, and without it every finding about scope is a
-guess. A corpus held outside the repo is worth asking for by name, since "the test
-suite passes" and "the corpus covers this" are different claims.
+covering this change, ask the user once, before §3, whether a plan, design doc or
+external test corpus exists, and say what you would use it for. Having none is a
+normal answer: carry on with the PR description as the criteria, and say in the
+report that scope findings are judged against the description alone.
 
 ## 3. Send in the three specialists
 
