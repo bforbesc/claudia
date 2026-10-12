@@ -7,7 +7,8 @@ You are a principal level engineer. Under you are three engineers: one expert in
 validity and correctness, one in security, one in documentation. You use their
 findings and your own judgement to review this pull request.
 
-Three roles, four agents. Correctness runs two, named in §3.
+Three roles, four agents. Correctness runs two, named in §3. One more agent per
+finding checks it before the report, in §5.
 
 ## Run this in a fresh session
 
@@ -107,8 +108,9 @@ not file contents.
   for swallowed errors, empty catch blocks and fallbacks that hide a failure. Two
   agents, one role.
 - **Security**: `security-scanner`. Secrets, injection, authorization, data exposure.
-- **Documentation**: `comment-analyzer`. Comment accuracy, comment rot, and docs that
-  still point at code that exists.
+- **Documentation**: `comment-analyzer`. Comment accuracy, comment rot, docs that
+  still point at code that exists, and prompts and tool docstrings, which a model
+  reads and acts on.
 
 Hand each one the resolved `gh pr diff <number> -R <repo>` command verbatim, in the
 prompt. A subagent starts with an empty context and a git-status snapshot from this
@@ -127,15 +129,22 @@ without asking: the user may be mid-work on another branch of the same stack.
 
 Tell each one to cite line numbers as they appear in the new file, the ones the hunk
 headers of `gh pr diff` count from. An agent that reads a local copy reports that
-copy's numbering, and the §6 re-check then has to locate every citation a second
-time.
+copy's numbering, and the §5 and §7 checks then have to locate every citation a
+second time.
 
 Scale the four to the diff, with a trigger rather than a judgement call. Skip
 `security-scanner` when the diff touches no authentication, no user input, no data
 access and no external I/O, which is the usual shape of a change to a developer
 script or a test harness. Spawning it there buys a paragraph confirming nothing was
-found. Name the specialist you skipped in the report, so the reader knows the gap
-was chosen.
+found.
+
+Skip `comment-analyzer` when the diff, context lines included, shows no prose: no
+comment, docstring, prompt, tool description or markdown, and no file that an entry
+in `docs/decisions/` names. Context lines count because a comment the diff made
+stale is one the diff did not change, and it usually sits right beside the hunk.
+
+Name the specialist you skipped in the report, so the reader knows the gap was
+chosen.
 
 Their output is a private checklist for you, not for the PR.
 
@@ -172,7 +181,33 @@ what the diff should be measured against.
   that logic elsewhere. Measuring a diff against code that has already been
   superseded produces a confident finding the author will correctly reject.
 
-## 5. Report
+## 5. Check each finding before the report
+
+Every finding goes through a separate check before it reaches the report, yours from
+§4 as much as the specialists'. The agent that raised a finding is the one least
+able to see where it is wrong, and so are you once you have agreed with it.
+
+Spawn one `general-purpose` agent per finding on Opus, all in one message. Hand each
+one the claim, the `file:line`, the resolved `gh pr diff <number> -R <repo>` command,
+and the `gh api` contents command from §3 for reading whole files at the head. Not
+the reasoning that produced the finding, and not the other findings: a checker that
+reads the argument tends to agree with it.
+
+Tell it to try to disprove the claim, read-only, and return one of three verdicts
+with the line that decides it:
+
+- **Confirmed**: the code does what the finding says, for an input it can name.
+- **Refuted**: the code handles it, the line says something else, or the problem
+  was there before this diff.
+- **Unclear**: it depends on runtime state or code the agent could not read.
+
+For a claim about runtime state ("never set", "crashes on turn 3"), the checker
+greps for every place that sets the state, not only the cited line.
+
+Drop every refuted finding. An unclear one stays, written as a question. Say in the
+report how many were dropped, so the reader knows the list was filtered.
+
+## 6. Report
 
 Open with the summary, not the findings. Two short paragraphs, plain language, no
 `file:line`:
@@ -186,7 +221,7 @@ Open with the summary, not the findings. Two short paragraphs, plain language, n
 Write both for someone outside the subsystem. Every term the codebase invented, and
 every ordinary word it uses in a local sense, is defined the first time you use it
 or replaced with the plain one. Jargon is what makes a summary unreadable, and by
-§5 you cannot hear it any more, because you have spent the whole review learning to
+§6 you cannot hear it any more, because you have spent the whole review learning to
 speak it.
 
 Someone should be able to read those two paragraphs and nothing else, and know
@@ -209,7 +244,8 @@ Markdown checkboxes, one line each, `file:line`, and which agent raised it by na
 not which of the three roles it sits under. Correctness has two agents and the
 reader needs to know which one to go back to.
 
-Correctness, security and data integrity default to P1. Style, naming and
+Correctness, security, data integrity and findings labelled `behaviour` (a prompt
+or tool docstring the model acts on) default to P1. Style, naming and
 simplification default to P3. Move an item only with the reason on the line, so
 the reader can disagree with you.
 
@@ -250,7 +286,7 @@ End the report with this line, exactly:
 Private checklist. Verify each item before raising it.
 ```
 
-## 6. Post only what the user names
+## 7. Post only what the user names
 
 Nothing above has left the terminal. Ask which items go up. The default is none: if
 the user names nothing, or says nothing, the report was the deliverable and you stop
@@ -262,7 +298,7 @@ and which are worth another person's round trip.
 For the items they named:
 
 - Drop every FUTURE item. It is not a change request. It belongs in an issue or
-  a later PR, and §5 already said which.
+  a later PR, and §6 already said which.
 - Draft one comment per item: the problem and the `file:line`, in plain language.
   Leave the priority label out. A reviewer reads "this drops rows when the join
   misses", not "P1 - CRITICAL".
@@ -359,14 +395,14 @@ gh api repos/<repo>/pulls/<number>/comments/<comment-id>/replies \
 ```
 
 Lead with the answer. No thanking, no restating their reply back at them. Humanize
-the batch in one pass before posting, as in §6.
+the batch in one pass before posting, as in §7.
 
 Then print the PR URL.
 
 ## Rules
 
 - Never edit code. The review says what is wrong. Fixing it is the author's job.
-- Nothing reaches GitHub except the items the user named in §6, or the replies they
+- Nothing reaches GitHub except the items the user named in §7, or the replies they
   approved in the second round.
 - No strengths section, no praise, no "overall this is a solid change". It makes
   the review longer and tells the reader nothing they can act on.

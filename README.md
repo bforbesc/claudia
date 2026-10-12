@@ -103,7 +103,7 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 | `agent-scaffold` | Sets a repo up for agentic work: project `CLAUDE.md`, a `justfile` with `verify`, a line-count gate, `.claude/rules/` and `docs/decisions/`. Run it once per repo before anything else. |
 | `agent-developer` | Builds a frozen plan through a fixed chain: write the tests, watch them fail for the right reason, implement, verify, scan, review, then append where each requirement landed. Never edits the plan. |
 | `open-pr` | Opens a PR for the current branch, or takes in an existing one's review comments and answers them one thread at a time. Inspects the branch first and stops for you to decide. |
-| `review-pr` | Reviews a PR as a principal engineer with three specialists across four subagents, from a PR number, link, or the branch you cloned. Reports in the terminal; posts only the findings you name. |
+| `review-pr` | Reviews a PR as a principal engineer with three specialists across four subagents, from a PR number, link, or the branch you cloned. A separate agent per finding tries to disprove it before the report, and refuted findings are dropped. Reports in the terminal; posts only the findings you name. |
 | `pay-tech-debt` | Measures debt in a scope you name — a path, a PR, a commit range, a subsystem — then pays one item with the tests green on both sides and no behaviour change. |
 | `resolve-pr-conflicts` | Summarizes merge conflicts, resolves the obvious ones automatically, and asks about the ambiguous ones. |
 | `handoff` | Writes the conversation context to a dated document in `~/Desktop/handoffs` and prints the path, so a fresh session can pick the work up. |
@@ -122,7 +122,7 @@ Seven agents, one job each. Skills name them in backticks rather than describing
 | `code-reviewer` | sonnet, xhigh | Read-only review for bugs and for the rules in `CLAUDE.md`. |
 | `silent-failure-hunter` | sonnet, high | Swallowed errors, empty catch blocks, fallbacks that hide a failure. |
 | `security-scanner` | sonnet, high | Secrets, injection, authorization, data exposure. |
-| `comment-analyzer` | sonnet, high | Whether comments and `docs/decisions/` entries still match the code they point at. |
+| `comment-analyzer` | sonnet, high | Whether comments, prompts, tool docstrings and `docs/decisions/` entries still match the code they point at. Treats prompts and tool docstrings as behaviour, since a model acts on them. `review-pr` runs it only when the diff shows prose. |
 | `explorer` | haiku | Read-only search across many files when only the conclusion is needed. |
 
 Each one resolves its own scope explicitly, because a subagent starts with an empty context and a git-status snapshot from the parent session. Handed a PR, it runs the exact `gh pr diff <number> -R <repo>` command it was given; handed nothing, it reads the working tree and says so. An empty diff is reported as an empty diff, never as a clean pass.
