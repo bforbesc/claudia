@@ -10,16 +10,28 @@ CLAUDE="$HOME/.claude"
 SKILLS="agent-developer agent-scaffold freeze-plan humanizer open-pr pay-tech-debt resolve-pr-conflicts review-pr walkthrough"
 HOOKS="git-gate.py"
 AGENTS="explorer.md code-reviewer.md comment-analyzer.md implementer.md security-scanner.md silent-failure-hunter.md test-writer.md"
+# settings.json keeps only plugins from these marketplaces, so a private
+# marketplace never shows up here by name.
+MARKETPLACES="claude-plugins-official openai-codex synced"
 
 # Deliberately absent, and not an oversight:
-#   employer take-home skill — carries an employer's take-home challenge
-#     and its grading rubric. This repo is public.
+#   employer skills and plugins — carry an employer's internal material, such as
+#     a take-home challenge and its grading rubric. This repo is public.
 #   onboarding — describes where a named employer's engagement context lives.
 #   projects/*/memory/ — names colleagues and records private feedback.
 #   settings.local.json — machine-local path allowlists.
 
 cp "$CLAUDE/CLAUDE.md"               "$REPO/config/CLAUDE.md"
-cp "$CLAUDE/settings.json"           "$REPO/config/settings.json"
+MARKETPLACES="$MARKETPLACES" python3 - "$CLAUDE/settings.json" "$REPO/config/settings.json" <<'PY'
+import json, os, sys
+keep = os.environ["MARKETPLACES"].split()
+settings = json.load(open(sys.argv[1]))
+plugins = settings.get("enabledPlugins", {})
+settings["enabledPlugins"] = {k: v for k, v in plugins.items() if k.split("@")[-1] in keep}
+with open(sys.argv[2], "w") as f:
+    json.dump(settings, f, indent=2)
+    f.write("\n")
+PY
 cp "$CLAUDE/statusline-command.sh"   "$REPO/config/statusline-command.sh"
 
 for skill in $SKILLS; do

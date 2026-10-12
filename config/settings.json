@@ -1,4 +1,5 @@
 {
+  "syncClaudeAiSkills": false,
   "permissions": {
     "allow": [
       "Read",
@@ -18,6 +19,12 @@
     "defaultMode": "auto"
   },
   "model": "opus",
+  "skillOverrides": {
+    "code-review": "off",
+    "simplify": "off",
+    "security-review": "off",
+    "init": "off"
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -56,30 +63,8 @@
     "command": "bash ~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "explanatory-output-style@claude-plugins-official": false,
-    "context7@claude-plugins-official": false,
-    "code-simplifier@claude-plugins-official": false,
-    "claude-md-management@claude-plugins-official": false,
-    "skill-creator@claude-plugins-official": false,
-    "commit-commands@claude-plugins-official": false,
-    "code-review@claude-plugins-official": false,
-    "superpowers@claude-plugins-official": false,
-    "github@claude-plugins-official": false,
-    "playwright@claude-plugins-official": false,
-    "pr-review-toolkit@claude-plugins-official": false,
-    "claude-code-setup@claude-plugins-official": false,
-    "codex@openai-codex": false,
-    "deploy-on-aws@claude-plugins-official": false,
-    "hookify@claude-plugins-official": false,
-    "ralph-loop@claude-plugins-official": false,
-    "greptile@claude-plugins-official": false,
-    "remember@claude-plugins-official": false,
-    "learning-output-style@claude-plugins-official": false,
-    "aws-serverless@claude-plugins-official": false,
-    "pydantic-ai@claude-plugins-official": false,
-    "aws-core@claude-plugins-official": false,
-    "aws-agents@claude-plugins-official": false,
-    "sagemaker-ai@claude-plugins-official": false
+    "small-business@synced": false,
+    "cowork-plugin-management@synced": false
   },
   "extraKnownMarketplaces": {
     "openai-codex": {
