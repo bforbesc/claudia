@@ -7,7 +7,7 @@ CLAUDE="$HOME/.claude"
 
 # Everything this repo publishes is named here. Nothing outside these lists is
 # copied, so a new skill, hook or agent stays private until you add it.
-SKILLS="agent-developer agent-scaffold decision-review freeze-plan handoff humanizer open-pr pay-tech-debt resolve-pr-conflicts review-pr walkthrough"
+SKILLS="agent-developer agent-scaffold freeze-plan humanizer open-pr pay-tech-debt resolve-pr-conflicts review-pr walkthrough"
 HOOKS="git-gate.py"
 AGENTS="explorer.md code-reviewer.md comment-analyzer.md implementer.md security-scanner.md silent-failure-hunter.md test-writer.md"
 

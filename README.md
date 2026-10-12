@@ -59,9 +59,7 @@ claudia/
 ├── skills/
 │   ├── agent-developer/
 │   ├── agent-scaffold/
-│   ├── decision-review/
 │   ├── freeze-plan/
-│   ├── handoff/
 │   ├── humanizer/
 │   ├── open-pr/
 │   ├── pay-tech-debt/
@@ -98,7 +96,6 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 | Skill | What it does |
 |-------|-------------|
 | `walkthrough` | Traces a scoped part of the codebase end to end, in the conversation. Writes no file: line-numbered snippets of code you're about to edit rot immediately, and re-running this costs less than reading a stale copy. |
-| `decision-review` | Interrogates you about a pending engineering decision, then pressure-tests it against 56 laws of software engineering and ends with a recommendation and a tripwire. Invoke-only: it never fires because a decision came up in conversation. |
 | `freeze-plan` | Stores the plan the conversation produced to `docs/decisions/<topic>.md`, stamped with the commit it was written against. It stores and does not validate — the argument already happened. |
 | `agent-scaffold` | Sets a repo up for agentic work: project `CLAUDE.md`, a `justfile` with `verify`, a line-count gate, `.claude/rules/` and `docs/decisions/`. Run it once per repo before anything else. |
 | `agent-developer` | Builds a frozen plan through a fixed chain: write the tests, watch them fail for the right reason, implement, verify, scan, review, then append where each requirement landed. Never edits the plan. |
@@ -106,10 +103,9 @@ Invoke any of these with `/skill-name` in a Claude Code session.
 | `review-pr` | Reviews a PR as a principal engineer with three specialists across four subagents, from a PR number, link, or the branch you cloned. A separate agent per finding tries to disprove it before the report, and refuted findings are dropped. Reports in the terminal; posts only the findings you name. |
 | `pay-tech-debt` | Measures debt in a scope you name — a path, a PR, a commit range, a subsystem — then pays one item with the tests green on both sides and no behaviour change. |
 | `resolve-pr-conflicts` | Summarizes merge conflicts, resolves the obvious ones automatically, and asks about the ambiguous ones. |
-| `handoff` | Writes the conversation context to a dated document in `~/Desktop/handoffs` and prints the path, so a fresh session can pick the work up. |
 | `humanizer` | Rewrites text that reads as machine-generated, based on Wikipedia's "Signs of AI writing." Third-party, MIT licensed. `open-pr` and `review-pr` both run their drafts through it before anything reaches GitHub, so it isn't optional. |
 
-The eleven above are everything in `~/.claude/skills/`. `sync.sh` publishes only the skills its list names, and its comments name two employer-specific skills, with the reason each is excluded, so a future sync doesn't quietly pick them up if they come back.
+The nine above are everything shared from `~/.claude/skills/`. `sync.sh` publishes only the skills its list names, and its comments name two employer-specific skills, with the reason each is excluded, so a future sync doesn't quietly pick them up if they come back.
 
 ## Subagents
 
