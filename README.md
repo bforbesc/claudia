@@ -33,7 +33,6 @@ All Claude Code config lives under `~/.claude/`:
 | `~/.claude/CLAUDE.md` | Global instructions loaded at the start of every session |
 | `~/.claude/settings.json` | Model, hooks, permissions, enabled plugins |
 | `~/.claude/statusline-command.sh` | Custom status bar script |
-| `~/.claude/hooks/` | Hook scripts referenced by `settings.json` |
 | `~/.claude/agents/<Name>.md` | Custom subagent definitions |
 | `~/.claude/skills/<name>/SKILL.md` | Custom skills, invoked with `/name` |
 | `~/.claude/projects/<path>/memory/MEMORY.md` | Per-project memory index (not published here) |
@@ -46,8 +45,6 @@ claudia/
 │   ├── CLAUDE.md               # Global instructions for all projects
 │   ├── settings.json           # Model, hooks, permissions, plugins
 │   └── statusline-command.sh   # Custom status bar script
-├── hooks/
-│   └── git-gate.py             # Approve/deny prompt before any git write
 ├── agents/                     # Seven subagents, one job each
 │   ├── explorer.md
 │   ├── code-reviewer.md
@@ -83,11 +80,9 @@ Hooks are automated behaviors wired into `settings.json` that fire without Claud
 
 | Event | When | What it does |
 |-------|------|-------------|
-| `PreToolUse → Bash` | Before any write git or `gh` command | Runs `hooks/git-gate.py`, which returns `permissionDecision: "ask"` so you get an approve/deny prompt. Read-only git commands pass through untouched. |
 | `PreToolUse → AskUserQuestion` | Before Claude asks a question | Speaks `"Need your input"` aloud |
 | `Stop` | When Claude finishes | Speaks `"Completed..."` aloud |
 
-Blocked commands: `git push`, `pull`, `commit`, `reset`, `rebase`, `merge`, `restore`, `clean`, `stash drop`, `branch -d/-D`, `tag -d/-f`, `checkout --`/`checkout .`, and `gh pr create/merge/close`.
 
 ## Skills
 
@@ -154,7 +149,7 @@ model is slower) and its own `plugins/` and `projects/`.
 git add -A && git commit -m "sync config" && git push
 ```
 
-`sync.sh` copies only the skills, hooks and agents named in the lists at the top of the file, so a new skill stays private until you add it. It also prints anything still tracked here that no longer exists in `~/.claude`, because copying never deletes and a renamed skill would otherwise live on as a file nothing produced. It reports those rather than pruning: removing a file from the repo is a decision, not a side effect of a sync.
+`sync.sh` copies only the skills and agents named in the lists at the top of the file, so a new skill stays private until you add it. It also prints anything still tracked here that no longer exists in `~/.claude`, because copying never deletes and a renamed skill would otherwise live on as a file nothing produced. It reports those rather than pruning: removing a file from the repo is a decision, not a side effect of a sync.
 
 Not published, on purpose: `~/.claude/projects/*/memory/` and `settings.local.json`.
 
@@ -165,7 +160,6 @@ cp config/CLAUDE.md ~/.claude/CLAUDE.md
 cp config/settings.json ~/.claude/settings.json
 cp config/statusline-command.sh ~/.claude/statusline-command.sh && chmod +x ~/.claude/statusline-command.sh
 mkdir -p ~/.claude/skills && cp -r skills/* ~/.claude/skills/
-mkdir -p ~/.claude/hooks && cp hooks/* ~/.claude/hooks/
 mkdir -p ~/.claude/agents && cp agents/* ~/.claude/agents/
 ```
 

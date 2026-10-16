@@ -35,15 +35,6 @@
             "command": "say 'Need your input'"
           }
         ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ~/.claude/hooks/git-gate.py"
-          }
-        ]
       }
     ],
     "Stop": [

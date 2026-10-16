@@ -1,14 +1,13 @@
 #!/bin/sh
 # sync.sh — pull live ~/.claude config into this repo
-# Run this whenever you've changed settings, CLAUDE.md, skills, hooks or agents.
+# Run this whenever you've changed settings, CLAUDE.md, skills or agents.
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE="$HOME/.claude"
 
 # Everything this repo publishes is named here. Nothing outside these lists is
-# copied, so a new skill, hook or agent stays private until you add it.
+# copied, so a new skill or agent stays private until you add it.
 SKILLS="agent-developer agent-scaffold freeze-plan humanizer open-pr pay-tech-debt resolve-pr-conflicts review-pr walkthrough"
-HOOKS="git-gate.py"
 AGENTS="explorer.md code-reviewer.md comment-analyzer.md implementer.md security-scanner.md silent-failure-hunter.md test-writer.md"
 # settings.json keeps only plugins from these marketplaces, so a private
 # marketplace never shows up here by name.
@@ -47,15 +46,6 @@ for skill in $SKILLS; do
   fi
 done
 
-# settings.json points at hooks by path, so a machine without them silently
-# loses the behaviour.
-for hook in $HOOKS; do
-  if [ -f "$CLAUDE/hooks/$hook" ]; then
-    mkdir -p "$REPO/hooks"
-    cp "$CLAUDE/hooks/$hook" "$REPO/hooks/$hook"
-  fi
-done
-
 for agent in $AGENTS; do
   if [ -f "$CLAUDE/agents/$agent" ]; then
     mkdir -p "$REPO/agents"
@@ -74,10 +64,6 @@ done
 for tracked in "$REPO"/agents/*.md; do
   name=$(basename "$tracked")
   [ -f "$CLAUDE/agents/$name" ] || stale="$stale agents/$name"
-done
-for tracked in "$REPO"/hooks/*; do
-  name=$(basename "$tracked")
-  [ -f "$CLAUDE/hooks/$name" ] || stale="$stale hooks/$name"
 done
 
 if [ -n "$stale" ]; then
