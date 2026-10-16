@@ -32,7 +32,6 @@ Cite `file:line` for any claim about existing code.
 Subagents should report findings and `file:line`, never paste file contents back.
 Never claim a check passed without running it.
 Ask first: deleting files, auth, billing, user data, public APIs, infrastructure and deploy config.
-Git is autonomous: commit, push and open PRs without asking.
 "I could not verify X" is a valid answer. Say it instead of guessing.
 
 # Writing
